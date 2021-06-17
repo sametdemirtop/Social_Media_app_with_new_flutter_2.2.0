@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "360000728341",
+    "project_id": "future-back-app",
+    "storage_bucket": "future-back-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:360000728341:android:280fd728399efee669cd1c",
+        "android_client_info": {
+          "package_name": "com.sametdemirtop.flutter_app_futureback"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "360000728341-hfrmnpb7qdjqlug3ilfruofq701g264g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sametdemirtop.flutter_app_futureback",
+            "certificate_hash": "f9c7c5a4644da36da799e969793fe17c00240c68"
+          }
+        },
+        {
+          "client_id": "360000728341-s82h2j9s4h9fs25l5naougsc29jib8ud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVISM69rCjDokGAT-6aSnyHBD6wr5xvSQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "360000728341-s82h2j9s4h9fs25l5naougsc29jib8ud.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
