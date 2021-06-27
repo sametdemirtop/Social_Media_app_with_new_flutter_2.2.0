@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_futureback/Sayfalar/AnaSayfa.dart';
 import 'package:flutter_app_futureback/Sayfalar/profilSayfasi.dart';
+import 'package:flutter_app_futureback/Sayfalar/takipEdilenler.dart';
 import 'package:flutter_app_futureback/Sayfalar/yuklemeSayfasi.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -15,52 +16,61 @@ class GirisEkran extends StatefulWidget {
   _GirisEkranState createState() => _GirisEkranState();
 }
 
-class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateMixin {
-  PageController sayfaKontrol;
+class _GirisEkranState extends State<GirisEkran>
+    with SingleTickerProviderStateMixin {
+  PageController? sayfaKontrol;
   int sayfaSayisi = 0;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  Key key;
-  File dosya;
+  Key? key;
+  File? dosya;
   final imagePicker = ImagePicker();
   Color favoriRenk = Colors.black38.withOpacity(0.4);
   int sayfaNum = 4;
   bool tiklandimi = false;
-  AnimationController animasyonKontrol;
-  Animation<Color> butonKontrol;
-  Animation<double> animasyonIkonu;
-  Animation<double> butonaCevirme;
+  AnimationController? animasyonKontrol;
+  late Animation<Color?> butonKontrol;
+  Animation<double>? animasyonIkonu;
+  Animation<double>? butonaCevirme;
   Curve egri = Curves.easeOut;
   double fabYukseklik = 56.0;
+  List<tEdilen> takipEdilenKullanicilar = [];
 
   @override
   void initState() {
     sayfaKontrol = PageController(initialPage: 0);
-    animasyonKontrol = AnimationController(vsync: this, duration: Duration(milliseconds: 1))
-      ..addListener(() {
-        setState(() {});
-      });
-    animasyonIkonu = Tween<double>(begin: 0.0, end: 1.0).animate(animasyonKontrol);
-    butonKontrol = ColorTween(begin: Colors.blue, end: Colors.red)
-        .animate(CurvedAnimation(parent: animasyonKontrol, curve: Interval(0.00, 1.00, curve: Curves.linear)));
-    butonaCevirme =
-        Tween<double>(begin: fabYukseklik, end: -14.0).animate(CurvedAnimation(parent: animasyonKontrol, curve: Interval(0.0, 0.75, curve: egri)));
+    animasyonKontrol =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 1))
+          ..addListener(() {
+            setState(() {});
+          });
+    animasyonIkonu =
+        Tween<double>(begin: 0.0, end: 1.0).animate(animasyonKontrol!);
+    butonKontrol = ColorTween(begin: Colors.blue, end: Colors.red).animate(
+        CurvedAnimation(
+            parent: animasyonKontrol!,
+            curve: Interval(0.00, 1.00, curve: Curves.linear)));
+    butonaCevirme = Tween<double>(begin: fabYukseklik, end: -14.0).animate(
+        CurvedAnimation(
+            parent: animasyonKontrol!,
+            curve: Interval(0.0, 0.75, curve: egri)));
     super.initState();
   }
 
   @override
   void dispose() {
-    animasyonKontrol.dispose();
+    animasyonKontrol!.dispose();
     super.dispose();
   }
 
   onTapPageChange(int pageIndex) {
-    sayfaKontrol.animateToPage(pageIndex, duration: Duration(milliseconds: 400), curve: Curves.bounceInOut);
+    sayfaKontrol!.animateToPage(pageIndex,
+        duration: Duration(milliseconds: 400), curve: Curves.bounceInOut);
   }
 
   whenPageChanges(int sayfaSayi) {
     setState(() {
       this.sayfaNum = sayfaSayi;
-      sayfaKontrol.jumpToPage(sayfaSayi);
+      sayfaKontrol!.jumpToPage(sayfaSayi);
     });
   }
 
@@ -70,9 +80,9 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
         // ignore: unnecessary_statements
         tiklandimi == true;
       });
-      animasyonKontrol.forward();
+      animasyonKontrol!.forward();
     } else {
-      animasyonKontrol.reverse();
+      animasyonKontrol!.reverse();
     }
     tiklandimi = !tiklandimi;
   }
@@ -80,19 +90,15 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
   Future kameradanFotograf() async {
     final fotograf = await imagePicker.getImage(source: ImageSource.camera);
     setState(() {
-      dosya = File(fotograf.path);
+      dosya = File(fotograf!.path);
     });
   }
 
   Future galeridenFotograf() async {
     final fotograf = await imagePicker.getImage(source: ImageSource.gallery);
     setState(() {
-      dosya = File(fotograf.path);
+      dosya = File(fotograf!.path);
     });
-  }
-
-  void sayfaZeroJumping(int page) {
-    sayfaKontrol.jumpToPage(page);
   }
 
   Widget butonKamera() {
@@ -123,7 +129,7 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
                             dosya: dosya,
                           )));
             } else {
-              sayfaKontrol.jumpToPage(0);
+              sayfaKontrol!.jumpToPage(0);
             }
           });
         },
@@ -153,7 +159,7 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
           galeridenFotograf().then((value) {
             // ignore: unnecessary_null_comparison
             if (dosya != null) {
-              Navigator.push(
+              Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                       builder: (context) => yuklemeSayfasi(
@@ -161,7 +167,7 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
                             dosya: dosya,
                           )));
             } else {
-              sayfaKontrol.jumpToPage(0);
+              sayfaKontrol!.jumpToPage(0);
             }
           });
         },
@@ -185,7 +191,9 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
           padding: EdgeInsets.zero,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(50),
-            image: DecorationImage(image: AssetImage("assets/images/sscard.png"), fit: BoxFit.fill),
+            image: DecorationImage(
+                image: AssetImage("assets/images/sscard.png"),
+                fit: BoxFit.fill),
           ),
         ),
       ),
@@ -205,7 +213,7 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
           aramaSayfasi(),
           bildirimSayfasi(),
           profilSayfasi(
-            kullaniciprofilID: anlikKullanici.id,
+            kullaniciprofilID: anlikKullanici!.id,
             postID: '',
           ),
         ],
@@ -221,11 +229,13 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
             child: Column(
               children: [
                 Transform(
-                  transform: Matrix4.translationValues(0.0, butonaCevirme.value * 2.0, 0.0),
+                  transform: Matrix4.translationValues(
+                      0.0, butonaCevirme!.value * 2.0, 0.0),
                   child: butonKamera(),
                 ),
                 Transform(
-                  transform: Matrix4.translationValues(0.0, butonaCevirme.value * 1.0, 0.0),
+                  transform: Matrix4.translationValues(
+                      0.0, butonaCevirme!.value * 1.0, 0.0),
                   child: butonGaleri(),
                 ),
                 butonEkleme(),
@@ -236,7 +246,8 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
       ),
       bottomNavigationBar: Container(
         child: ClipRRect(
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
           child: BottomAppBar(
             notchMargin: 24,
             shape: CircularNotchedRectangle(),
@@ -250,7 +261,8 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
                     padding: EdgeInsets.only(left: 28.0),
                     icon: Icon(
                       Icons.home_filled,
-                      color: sayfaNum == 0 ? Colors.deepOrange[200] : favoriRenk,
+                      color:
+                          sayfaNum == 0 ? Colors.deepOrange[200] : favoriRenk,
                     ),
                     onPressed: () {
                       whenPageChanges(0);
@@ -260,7 +272,8 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
                     padding: EdgeInsets.only(right: 28.0),
                     icon: Icon(
                       Icons.search,
-                      color: sayfaNum == 1 ? Colors.deepOrange[200] : favoriRenk,
+                      color:
+                          sayfaNum == 1 ? Colors.deepOrange[200] : favoriRenk,
                     ),
                     onPressed: () {
                       whenPageChanges(1);
@@ -270,7 +283,8 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
                     padding: EdgeInsets.only(left: 28.0),
                     icon: Icon(
                       Icons.favorite,
-                      color: sayfaNum == 2 ? Colors.deepOrange[200] : favoriRenk,
+                      color:
+                          sayfaNum == 2 ? Colors.deepOrange[200] : favoriRenk,
                     ),
                     onPressed: () {
                       whenPageChanges(2);
@@ -278,7 +292,7 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
                   ),
                   GestureDetector(
                     onTap: () {
-                      sayfaKontrol.jumpToPage(3);
+                      sayfaKontrol!.jumpToPage(3);
                     },
                     child: Padding(
                       padding: EdgeInsets.only(right: 15),
@@ -287,10 +301,17 @@ class _GirisEkranState extends State<GirisEkran> with SingleTickerProviderStateM
                           height: 37,
                           width: 37,
                           decoration: BoxDecoration(
-                            boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
+                            boxShadow: [
+                              BoxShadow(
+                                  offset: Offset(0, 10),
+                                  blurRadius: 10,
+                                  color: Colors.grey)
+                            ],
                             borderRadius: BorderRadius.circular(14),
                             // ignore: unnecessary_null_comparison
-                            image: DecorationImage(fit: BoxFit.cover, image: NetworkImage(anlikKullanici.url)),
+                            image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: NetworkImage(anlikKullanici!.url)),
                           ),
                         ),
                       ),

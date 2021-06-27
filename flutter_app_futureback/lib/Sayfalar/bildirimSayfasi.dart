@@ -2,47 +2,54 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_futureback/Sayfalar/AnaSayfa.dart';
 import 'package:flutter_app_futureback/Sayfalar/profilSayfasi.dart';
-import 'package:flutter_app_futureback/widgets/Progress.dart';
 import 'package:flutter_app_futureback/widgets/baslik.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import 'bildirimGonderisi.dart';
 
+// ignore: camel_case_types
 class bildirimSayfasi extends StatefulWidget {
   @override
   _bildirimSayfasiState createState() => _bildirimSayfasiState();
 }
 
-class _bildirimSayfasiState extends State<bildirimSayfasi> with AutomaticKeepAliveClientMixin<bildirimSayfasi> {
-  List<Bildirim> tumBildirimler = [];
+// ignore: camel_case_types
+class _bildirimSayfasiState extends State<bildirimSayfasi>
+    with AutomaticKeepAliveClientMixin<bildirimSayfasi> {
+  List<Bildirim>? tumBildirimler = [];
   @override
   void initState() {
-    super.initState();
     bildirimleriGetir();
+    super.initState();
   }
 
   bildirimleriGetir() async {
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-        await bildirimRef.doc(anlikKullanici.id).collection("bildirimler").orderBy('timestamp', descending: true).get();
-
-    List<Bildirim> bildirimler = snapshot.docs.map((doc) => Bildirim.fromDocument(doc.data())).toList();
-
+    QuerySnapshot snapshot = await bildirimRef
+        .doc(anlikKullanici!.id)
+        .collection("bildirimler")
+        .orderBy('timestamp', descending: true)
+        .get();
+    List<Bildirim> bildirimler = snapshot.docs
+        .map((e) =>
+            Bildirim.fromDocument(e as DocumentSnapshot<Map<String, dynamic>>?))
+        .toList(growable: false);
     setState(() {
       this.tumBildirimler = bildirimler;
     });
   }
 
-  bildirimOlustur() {
-    if (tumBildirimler == null) {
-      return circularProgress();
-    } else if (tumBildirimler.isEmpty) {
-      return Text("");
+  /*bildirimOlustur() {
+    // ignore: unnecessary_null_comparison
+    if (tumBildirimler!.isEmpty) {
+      return Center(
+        child: Text("Bildirim Yok"),
+      );
     } else {
       return ListView(
-        children: tumBildirimler,
+        children: tumBildirimler!,
       );
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +61,9 @@ class _bildirimSayfasiState extends State<bildirimSayfasi> with AutomaticKeepAli
         child: RefreshIndicator(
           color: Colors.black54,
           onRefresh: () => bildirimleriGetir(),
-          child: bildirimOlustur(),
+          child: ListView(
+            children: tumBildirimler!,
+          ),
         ),
       ),
     );
@@ -65,30 +74,41 @@ class _bildirimSayfasiState extends State<bildirimSayfasi> with AutomaticKeepAli
 }
 
 String bilidirmAciklamasi = "";
-Widget bildirimSecenek;
+Widget? bildirimSecenek;
 
 class Bildirim extends StatelessWidget {
-  final String username;
-  final String type;
-  final String commentData;
-  final String postID;
-  final String userID;
-  final String userProfileImg;
-  final String url;
-  final Timestamp timestamp;
+  final String? username;
+  final String? type;
+  final String? commentData;
+  final String? postID;
+  final String? userID;
+  final String? userProfileImg;
+  final String? url;
+  final Timestamp? timestamp;
+  final String? ownerID;
 
-  Bildirim({this.username, this.type, this.commentData, this.postID, this.userID, this.userProfileImg, this.timestamp, this.url});
+  Bildirim(
+      {this.username,
+      this.type,
+      this.commentData,
+      this.postID,
+      this.userID,
+      this.userProfileImg,
+      this.timestamp,
+      this.url,
+      this.ownerID});
 
-  factory Bildirim.fromDocument(Map<String, dynamic> doc) {
+  factory Bildirim.fromDocument(DocumentSnapshot<Map<String, dynamic>>? doc) {
     return Bildirim(
-      username: doc['username'],
+      username: doc!['username'],
       type: doc['type'],
-      commentData: doc['commentData'],
-      postID: doc['postID'],
       userID: doc['userID'],
+      postID: doc['postID'],
       userProfileImg: doc['userProfileImg'],
-      url: doc['url'],
       timestamp: doc['timestamp'],
+      url: doc['url'],
+      commentData: doc['commentData'],
+      ownerID: doc['ownerID'],
     );
   }
   @override
@@ -102,26 +122,46 @@ class Bildirim extends StatelessWidget {
             displayUserProfile(context, userProfileID: userID);
           },
           child: RichText(
-            overflow: TextOverflow.ellipsis,
-            text: TextSpan(style: TextStyle(fontSize: 14, color: Colors.black), children: [
-              TextSpan(text: username, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-              TextSpan(
-                text: "$bilidirmAciklamasi",
-              ),
-            ]),
+            text: TextSpan(
+                style: TextStyle(fontSize: 14, color: Colors.black),
+                children: [
+                  TextSpan(
+                      text: username,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black)),
+                  TextSpan(
+                    text: "$bilidirmAciklamasi",
+                  ),
+                ]),
           ),
         ),
         leading: GestureDetector(
           onTap: () {
             displayUserProfile(context, userProfileID: userID);
           },
-          child: CircleAvatar(
-            radius: 25,
-            backgroundImage: userProfileImg != null ? NetworkImage(userProfileImg) : null,
+          child: Container(
+            height: 50,
+            width: 50,
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Container(
+                decoration: new BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                        offset: Offset(0, 10),
+                        blurRadius: 10,
+                        color: Colors.grey)
+                  ],
+                  image: DecorationImage(
+                      fit: BoxFit.cover, image: NetworkImage(userProfileImg!)),
+                ),
+              ),
+            ),
           ),
         ),
         subtitle: Text(
-          timeago.format(timestamp.toDate()),
+          timeago.format(timestamp!.toDate()),
           overflow: TextOverflow.ellipsis,
           style: TextStyle(color: Colors.black45),
         ),
@@ -144,8 +184,12 @@ class Bildirim extends StatelessWidget {
             child: Container(
               decoration: new BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
-                boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
-                image: url != null ? DecorationImage(fit: BoxFit.cover, image: NetworkImage(url)) : null,
+                boxShadow: [
+                  BoxShadow(
+                      offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)
+                ],
+                image: DecorationImage(
+                    fit: BoxFit.cover, image: NetworkImage(url!)),
               ),
             ),
           ),
@@ -157,9 +201,9 @@ class Bildirim extends StatelessWidget {
     if (type == 'Follow') {
       bilidirmAciklamasi = " " + "seni takip etmeye başladı";
     } else if (type == 'comment') {
-      bilidirmAciklamasi = " " + "yorum yaptı : $commentData";
+      bilidirmAciklamasi = " " + "yorum yaptı : " + commentData!;
     } else if (type == 'like') {
-      bilidirmAciklamasi = " " + "senin fotoğrafını beğendi";
+      bilidirmAciklamasi = " " + "senin kartını beğendi";
     } else if (type == 'kaydetme') {
       bilidirmAciklamasi = " " + "senin kartını kaydetti";
     } else {
@@ -168,7 +212,7 @@ class Bildirim extends StatelessWidget {
   }
 }
 
-gonderiyiGoster(context, {String gonderiID, String kullaniciID}) {
+gonderiyiGoster(context, {String? gonderiID, String? kullaniciID}) {
   Navigator.push(
       context,
       MaterialPageRoute(
@@ -178,7 +222,7 @@ gonderiyiGoster(context, {String gonderiID, String kullaniciID}) {
               )));
 }
 
-displayUserProfile(context, {String userProfileID}) {
+displayUserProfile(context, {String? userProfileID}) {
   Navigator.push(
       context,
       MaterialPageRoute(

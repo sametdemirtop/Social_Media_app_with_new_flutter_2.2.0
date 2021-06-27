@@ -8,9 +8,9 @@ import 'package:flutter_app_futureback/widgets/progress.dart';
 import 'AnaSayfa.dart';
 
 class kaydedilenKartlar extends StatefulWidget {
-  final String kullaniciID;
+  final String? kullaniciID;
   kaydedilenKartlar({
-    this.kullaniciID,
+    required this.kullaniciID,
   });
   @override
   _kaydedilenKartlarState createState() => _kaydedilenKartlarState();
@@ -35,15 +35,15 @@ class _kaydedilenKartlarState extends State<kaydedilenKartlar> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    return FutureBuilder<QuerySnapshot>(
         future: akisRef.get(),
         builder: (context, dataSnapshot) {
           if (!dataSnapshot.hasData) {
             return circularProgress();
           }
           List<Gonderiler> tumAkisKartlari = [];
-          dataSnapshot.data.docs.forEach((element) {
-            Gonderiler gonderi = Gonderiler.fromDocument(element.data());
+          dataSnapshot.data!.docs.forEach((element) {
+            Gonderiler gonderi = Gonderiler.fromDocument(element);
             for (var doc in tumKartlar) {
               if (gonderi.postID == doc.postID) {
                 tumAkisKartlari.add(gonderi);
@@ -76,9 +76,9 @@ class kart {
   final String username;
 
   kart({
-    this.postID,
-    this.username,
-    this.ownerID,
+    required this.postID,
+    required this.username,
+    required this.ownerID,
   });
 
   factory kart.fromDocument(Map<String, dynamic> doc) {

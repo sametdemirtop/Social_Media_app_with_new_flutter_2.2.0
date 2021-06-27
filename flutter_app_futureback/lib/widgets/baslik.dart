@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-PreferredSize baslik(context, {bool uygulamaBasligi = false, String strBaslik, geriButonuYokSay = false}) {
+PreferredSize baslik(context, {bool uygulamaBasligi = false, required String strBaslik, geriButonuYokSay = false}) {
   return PreferredSize(
       child: AppBar(
         elevation: 10,

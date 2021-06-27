@@ -4,16 +4,18 @@ import 'package:flutter_app_futureback/Sayfalar/AnaSayfa.dart';
 import 'package:flutter_app_futureback/Sayfalar/profilSayfasi.dart';
 import 'package:flutter_app_futureback/model/Kullanici.dart';
 
+// ignore: camel_case_types
 class aramaSayfasi extends StatefulWidget {
   @override
   _aramaSayfasiState createState() => _aramaSayfasiState();
 }
 
+// ignore: camel_case_types
 class _aramaSayfasiState extends State<aramaSayfasi> {
-  TextEditingController textDuzenlemeKontrol;
-  Future<QuerySnapshot> futureAramaSonuclari;
+  TextEditingController? textDuzenlemeKontrol;
+  Future<QuerySnapshot>? futureAramaSonuclari;
   aramaYeriTemizleme() {
-    textDuzenlemeKontrol.clear();
+    textDuzenlemeKontrol!.clear();
   }
 
   @override
@@ -24,12 +26,13 @@ class _aramaSayfasiState extends State<aramaSayfasi> {
 
   @override
   void dispose() {
-    textDuzenlemeKontrol.dispose();
+    textDuzenlemeKontrol!.dispose();
     super.dispose();
   }
 
   aramaKontrol(String str) {
-    Future<QuerySnapshot<Map<String, dynamic>>> tumKullanicilar = kullaniciRef.where("username", isGreaterThanOrEqualTo: str).get();
+    Future<QuerySnapshot<Map<String, dynamic>>> tumKullanicilar =
+        kullaniciRef.where("username", isGreaterThanOrEqualTo: str).get();
     setState(() {
       futureAramaSonuclari = tumKullanicilar;
     });
@@ -50,7 +53,12 @@ class _aramaSayfasiState extends State<aramaSayfasi> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(35.0),
-                        boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
+                        boxShadow: [
+                          BoxShadow(
+                              offset: Offset(0, 10),
+                              blurRadius: 10,
+                              color: Colors.grey)
+                        ],
                       ),
                       child: Row(
                         children: [
@@ -63,7 +71,10 @@ class _aramaSayfasiState extends State<aramaSayfasi> {
                           Expanded(
                             child: TextFormField(
                               controller: textDuzenlemeKontrol,
-                              decoration: InputDecoration(hintText: "Ara", hintStyle: TextStyle(color: Colors.black26), border: InputBorder.none),
+                              decoration: InputDecoration(
+                                  hintText: "Ara",
+                                  hintStyle: TextStyle(color: Colors.black26),
+                                  border: InputBorder.none),
                               onFieldSubmitted: aramaKontrol,
                             ),
                           ),
@@ -79,21 +90,23 @@ class _aramaSayfasiState extends State<aramaSayfasi> {
               ),
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(bottomRight: Radius.circular(50), bottomLeft: Radius.circular(50)),
+              borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(50),
+                  bottomLeft: Radius.circular(50)),
             )),
         preferredSize: Size.fromHeight(80));
   }
 
   kullanicilariGosterme<Widget>() {
-    return FutureBuilder(
+    return FutureBuilder<QuerySnapshot>(
       future: futureAramaSonuclari,
       builder: (context, dataSnapshot) {
         if (!dataSnapshot.hasData) {
           return Text("");
         }
         List<KullaniciSonuc> kullaniciAramaSonucu = [];
-        dataSnapshot.data.docs.forEach((documents) {
-          Kullanici herbirKullanici = Kullanici.fromDocument(documents.data());
+        dataSnapshot.data!.docs.forEach((documents) {
+          Kullanici herbirKullanici = Kullanici.fromDocument(documents);
           KullaniciSonuc userResult = KullaniciSonuc(herbirKullanici);
           kullaniciAramaSonucu.add(userResult);
         });
@@ -118,7 +131,7 @@ class _aramaSayfasiState extends State<aramaSayfasi> {
 }
 
 class KullaniciSonuc extends StatelessWidget {
-  final Kullanici herbirKullanici;
+  final Kullanici? herbirKullanici;
   KullaniciSonuc(this.herbirKullanici);
 
   @override
@@ -129,19 +142,40 @@ class KullaniciSonuc extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () {
-              kullaniciProfiliGoster(context, kullaniciProfilID: herbirKullanici.id);
+              kullaniciProfiliGoster(context,
+                  kullaniciProfilID: herbirKullanici!.id);
             },
             child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.white,
-                backgroundImage: NetworkImage(herbirKullanici.url),
+              leading: Container(
+                height: 50,
+                width: 50,
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                            offset: Offset(0, 10),
+                            blurRadius: 10,
+                            color: Colors.grey)
+                      ],
+                      image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: NetworkImage(herbirKullanici!.url)),
+                    ),
+                  ),
+                ),
               ),
               title: Text(
-                herbirKullanici.profileName,
-                style: TextStyle(color: Colors.black87, fontSize: 16.0, fontWeight: FontWeight.bold),
+                herbirKullanici!.profileName,
+                style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold),
               ),
               subtitle: Text(
-                herbirKullanici.username,
+                herbirKullanici!.username,
                 style: TextStyle(
                   color: Colors.black87,
                   fontSize: 13.0,
@@ -156,7 +190,7 @@ class KullaniciSonuc extends StatelessWidget {
 
   kullaniciProfiliGoster(
     context, {
-    String kullaniciProfilID,
+    required String kullaniciProfilID,
   }) {
     Navigator.push(
         context,

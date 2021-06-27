@@ -35,7 +35,9 @@ class MyApp extends StatelessWidget {
         cardColor: Colors.white,
         accentColor: Colors.white70,
       ),
-      home: AnaSayfa(girdimi: false,),
+      home: AnaSayfa(
+        girdimi: false,
+      ),
     );
   }
 }

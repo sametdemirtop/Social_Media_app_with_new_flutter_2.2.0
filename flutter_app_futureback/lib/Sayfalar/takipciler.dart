@@ -8,8 +8,8 @@ import 'package:flutter_app_futureback/widgets/progress.dart';
 
 // ignore: camel_case_types
 class takipciler extends StatefulWidget {
-  final String kullaniciprofilID;
-  final String anlikKullaniciID;
+  final String? kullaniciprofilID;
+  final String? anlikKullaniciID;
   takipciler({this.kullaniciprofilID, this.anlikKullaniciID});
   @override
   _takipcilerState createState() => _takipcilerState();
@@ -17,7 +17,7 @@ class takipciler extends StatefulWidget {
 
 // ignore: camel_case_types
 class _takipcilerState extends State<takipciler> {
-  List<takipci> tumTakipciler = [];
+  List<takipci>? tumTakipciler = [];
   void initState() {
     super.initState();
     profilKontrol();
@@ -33,18 +33,26 @@ class _takipcilerState extends State<takipciler> {
   }
 
   takipcileriGetirAnlik() async {
-    QuerySnapshot snapshot = await takipciRef.doc(widget.anlikKullaniciID).collection("takipciler").get();
+    QuerySnapshot snapshot = await takipciRef
+        .doc(widget.anlikKullaniciID)
+        .collection("takipciler")
+        .get();
 
-    List<takipci> kullanicires1 = snapshot.docs.map((doc) => takipci.fromDocument(doc.data())).toList();
+    List<takipci>? kullanicires1 =
+        snapshot.docs.map((doc) => takipci.fromDocument(doc)).toList();
     setState(() {
       this.tumTakipciler = kullanicires1;
     });
   }
 
   takipcileriGetirKullanici() async {
-    QuerySnapshot snapshot = await takipciRef.doc(widget.kullaniciprofilID).collection("takipciler").get();
+    QuerySnapshot snapshot = await takipciRef
+        .doc(widget.kullaniciprofilID)
+        .collection("takipciler")
+        .get();
 
-    List<takipci> kullanicires1 = snapshot.docs.map((doc) => takipci.fromDocument(doc.data())).toList();
+    List<takipci>? kullanicires1 =
+        snapshot.docs.map((doc) => takipci.fromDocument(doc)).toList();
     setState(() {
       this.tumTakipciler = kullanicires1;
     });
@@ -52,18 +60,18 @@ class _takipcilerState extends State<takipciler> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    return FutureBuilder<QuerySnapshot>(
         future: kullaniciRef.get(),
         builder: (context, dataSnapshot) {
           if (!dataSnapshot.hasData) {
             return circularProgress();
           }
-          List<KullaniciSonuc> kullaniciAramaSonucu = [];
-          dataSnapshot.data.docs.forEach((documents) {
-            Kullanici herbirKullanici = Kullanici.fromDocument(documents.data());
-            for (var doc in tumTakipciler) {
+          List<KullaniciSonuc>? kullaniciAramaSonucu = [];
+          dataSnapshot.data!.docs.forEach((documents) {
+            Kullanici? herbirKullanici = Kullanici.fromDocument(documents);
+            for (var doc in tumTakipciler!) {
               if (doc.id == herbirKullanici.id) {
-                KullaniciSonuc userResult = KullaniciSonuc(herbirKullanici);
+                KullaniciSonuc? userResult = KullaniciSonuc(herbirKullanici);
                 kullaniciAramaSonucu.add(userResult);
               }
             }
@@ -87,11 +95,11 @@ class _takipcilerState extends State<takipciler> {
 
 // ignore: camel_case_types
 class takipci {
-  final String id;
+  final String? id;
 
   takipci({this.id});
 
-  factory takipci.fromDocument(Map<String, dynamic> doc) {
+  factory takipci.fromDocument(DocumentSnapshot doc) {
     return takipci(
       id: doc['id'],
     );

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_futureback/Sayfalar/AnaSayfa.dart';
+import 'package:flutter_app_futureback/Sayfalar/GirisEkran.dart';
 import 'package:flutter_app_futureback/model/Kullanici.dart';
 import 'package:flutter_app_futureback/widgets/Progress.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,30 +11,30 @@ import 'package:image/image.dart' as ImD;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+// ignore: camel_case_types
 class yuklemeSayfasi extends StatefulWidget {
-  final Kullanici kullanici;
-  final File dosya;
+  final Kullanici? kullanici;
+  final File? dosya;
   yuklemeSayfasi({this.kullanici, this.dosya});
 
   @override
   _yuklemeSayfasiState createState() => _yuklemeSayfasiState(dosya: this.dosya);
 }
 
+// ignore: camel_case_types
 class _yuklemeSayfasiState extends State<yuklemeSayfasi> {
-  File dosya;
+  File? dosya;
   bool yukleniyor = false;
   String gonderiID = Uuid().v4();
   TextEditingController textDuzenlemeKontrol = TextEditingController();
   TextEditingController konumDuzenlemeKontrol = TextEditingController();
-  PageController sayfaKontrol;
+  PageController? sayfaKontrol;
 
   _yuklemeSayfasiState({this.dosya});
-  gonderiBilgisiTemizleme() {
+  gonderiBilgisiTemizleme() async {
     konumDuzenlemeKontrol.clear();
     textDuzenlemeKontrol.clear();
-    setState(() {
-      this.dosya = dosya.delete(recursive: true) as File;
-    });
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => GirisEkran()));
   }
 
   getUserCurrentLocation() async {
@@ -47,8 +48,8 @@ class _yuklemeSayfasiState extends State<yuklemeSayfasi> {
   fotografiBicimlendirme() async {
     final dizin = await getTemporaryDirectory();
     final yol = dizin.path;
-    ImD.Image fotografDosyasi = ImD.decodeImage(dosya.readAsBytesSync());
-    var bicimlenenGonderiDosyasi = File("$yol/img_$gonderiID.jpg")..writeAsBytesSync(ImD.encodeJpg(fotografDosyasi, quality: 90));
+    ImD.Image? fotografDosyasi = ImD.decodeImage(dosya!.readAsBytesSync());
+    var bicimlenenGonderiDosyasi = File("$yol/img_$gonderiID.jpg")..writeAsBytesSync(ImD.encodeJpg(fotografDosyasi!, quality: 90));
     setState(() {
       dosya = bicimlenenGonderiDosyasi;
     });
@@ -65,24 +66,23 @@ class _yuklemeSayfasiState extends State<yuklemeSayfasi> {
       yukleniyor = true;
     });
     await fotografiBicimlendirme();
-    String urlIndirme = await fotografYukleme(dosya);
+    String urlIndirme = await fotografYukleme(dosya!);
     gonderiFireStoreKaydetme(urlIndirme, konumDuzenlemeKontrol.text, textDuzenlemeKontrol.text);
     konumDuzenlemeKontrol.clear();
     textDuzenlemeKontrol.clear();
     setState(() {
-      dosya = dosya.delete(recursive: true) as File;
-      yukleniyor = false;
+      dosya = dosya!.delete(recursive: true) as File;
       gonderiID = Uuid().v4();
     });
   }
 
   gonderiFireStoreKaydetme(String urlIndirme, String konum, String aciklama) {
-    gonderiRef.doc(widget.kullanici.id).collection("kullaniciGonderi").doc(gonderiID).set({
+    gonderiRef.doc(widget.kullanici!.id).collection("kullaniciGonderi").doc(gonderiID).set({
       "postID": gonderiID,
-      "ownerID": widget.kullanici.id,
+      "ownerID": widget.kullanici!.id,
       "timestamp": DateTime.now(),
       "likes": {},
-      "username": widget.kullanici.username,
+      "username": widget.kullanici!.username,
       "description": aciklama,
       "location": konum,
       "url": urlIndirme,
@@ -90,10 +90,10 @@ class _yuklemeSayfasiState extends State<yuklemeSayfasi> {
     });
     akisRef.doc(gonderiID).set({
       "postID": gonderiID,
-      "ownerID": widget.kullanici.id,
+      "ownerID": widget.kullanici!.id,
       "timestamp": DateTime.now(),
       "likes": {},
-      "username": widget.kullanici.username,
+      "username": widget.kullanici!.username,
       "description": aciklama,
       "location": konum,
       "url": urlIndirme,
@@ -151,7 +151,7 @@ class _yuklemeSayfasiState extends State<yuklemeSayfasi> {
                     width: MediaQuery.of(context).size.width * 0.8,
                     child: Center(
                       child: Container(
-                        decoration: BoxDecoration(image: DecorationImage(image: FileImage(dosya), fit: BoxFit.cover)),
+                        decoration: BoxDecoration(image: DecorationImage(image: FileImage(dosya!), fit: BoxFit.cover)),
                       ),
                     ),
                   ),
@@ -160,7 +160,7 @@ class _yuklemeSayfasiState extends State<yuklemeSayfasi> {
                   ),
                   ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: NetworkImage(widget.kullanici.url),
+                      backgroundImage: NetworkImage(widget.kullanici!.url),
                     ),
                     title: Container(
                       width: 250.0,

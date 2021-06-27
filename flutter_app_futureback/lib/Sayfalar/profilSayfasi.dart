@@ -14,8 +14,8 @@ import 'kaydedilenKartlar.dart';
 
 // ignore: camel_case_types
 class profilSayfasi extends StatefulWidget {
-  final String kullaniciprofilID;
-  final String postID;
+  final String? kullaniciprofilID;
+  final String? postID;
   profilSayfasi({this.kullaniciprofilID, this.postID});
 
   @override
@@ -23,15 +23,17 @@ class profilSayfasi extends StatefulWidget {
 }
 
 // ignore: camel_case_types
-class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveClientMixin<profilSayfasi> {
-  final String onlineKullaniciID = anlikKullanici.id;
-  List<Gonderiler> gonderiListesi = [];
-  String GonderiStili = "grid";
-  int gonderiHesapla = 0;
-  int toplamTakipciHesapla = -1;
-  int toplamTakipEdilenHesapla = 0;
-  bool takip = false;
-  bool yuklenme = false;
+class _profilSayfasiState extends State<profilSayfasi>
+    with AutomaticKeepAliveClientMixin<profilSayfasi> {
+  final String? onlineKullaniciID = anlikKullanici!.id;
+  List<Gonderiler>? gonderiListesi = [];
+  // ignore: non_constant_identifier_names
+  String? GonderiStili = "grid";
+  int? gonderiHesapla = 0;
+  int? toplamTakipciHesapla = -1;
+  int? toplamTakipEdilenHesapla = 0;
+  bool? takip = false;
+  bool? yuklenme = false;
   @override
   void initState() {
     super.initState();
@@ -42,22 +44,31 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
   }
 
   tumTakipedilenleriGetirveHesapla() async {
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await takipEdilenRef.doc(widget.kullaniciprofilID).collection("takipEdilenler").get();
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await takipEdilenRef
+        .doc(widget.kullaniciprofilID)
+        .collection("takipEdilenler")
+        .get();
     setState(() {
       toplamTakipEdilenHesapla = querySnapshot.docs.length;
     });
   }
 
   takipEdiyormu() async {
-    DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
-        await takipciRef.doc(widget.kullaniciprofilID).collection("takipciler").doc(onlineKullaniciID).get();
+    DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await takipciRef
+        .doc(widget.kullaniciprofilID)
+        .collection("takipciler")
+        .doc(onlineKullaniciID)
+        .get();
     setState(() {
       takip = documentSnapshot.exists;
     });
   }
 
   tumTakipcileriGetirveHesapla() async {
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await takipciRef.doc(widget.kullaniciprofilID).collection("takipciler").get();
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await takipciRef
+        .doc(widget.kullaniciprofilID)
+        .collection("takipciler")
+        .get();
     setState(() {
       toplamTakipciHesapla = querySnapshot.docs.length;
     });
@@ -69,14 +80,19 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
             elevation: 10,
             backgroundColor: Colors.white,
             automaticallyImplyLeading: false,
-            title: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            title: FutureBuilder<DocumentSnapshot>(
                 future: kullaniciRef.doc(widget.kullaniciprofilID).get(),
                 builder: (context, dataSnapshot) {
                   if (!dataSnapshot.hasData) {
                     return Text("");
                   }
-                  Kullanici kullanici = Kullanici.fromDocument(dataSnapshot.data.data());
-                  return Text(kullanici.username, style: TextStyle(color: Colors.black, fontSize: 23, fontWeight: FontWeight.bold));
+                  Kullanici kullanici =
+                      Kullanici.fromDocument(dataSnapshot.data!);
+                  return Text(kullanici.username,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 23,
+                          fontWeight: FontWeight.bold));
                 }),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
@@ -87,13 +103,21 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
   }
 
   takipEdilenleriGor() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => takipEdilenler(kullaniciprofilID: widget.kullaniciprofilID, anlikKullaniciID: onlineKullaniciID)));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => takipEdilenler(
+                kullaniciprofilID: widget.kullaniciprofilID,
+                anlikKullaniciID: onlineKullaniciID)));
   }
 
   takipcileriGor() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => takipciler(kullaniciprofilID: widget.kullaniciprofilID, anlikKullaniciID: onlineKullaniciID)));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => takipciler(
+                kullaniciprofilID: widget.kullaniciprofilID,
+                anlikKullaniciID: onlineKullaniciID)));
   }
 
   Column sutunOlustur(String baslik, int sayac) {
@@ -103,7 +127,8 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
       children: [
         Text(
           sayac.toString(),
-          style: TextStyle(fontSize: 25.0, color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 25.0, color: Colors.black, fontWeight: FontWeight.bold),
         ),
         Container(
           margin: EdgeInsets.only(top: 5.0),
@@ -127,12 +152,12 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
         baslik: "Profil Düzenle",
         fonskiyonIslevi: kullaniciProfilDuzenle,
       );
-    } else if (takip) {
+    } else if (takip!) {
       return baslikFonksiyonveButonOlusturma(
         baslik: "Takipten Çıkar",
         fonskiyonIslevi: takiptenCikarmaKontrol,
       );
-    } else if (!takip) {
+    } else if (!takip!) {
       return baslikFonksiyonveButonOlusturma(
         baslik: "Takip Et",
         fonskiyonIslevi: takipEtmeKontrolu,
@@ -141,24 +166,50 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
   }
 
   profilBasligi() {
-    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+    return FutureBuilder<DocumentSnapshot>(
       future: kullaniciRef.doc(widget.kullaniciprofilID).get(),
       builder: (context, dataSnapshot) {
         if (!dataSnapshot.hasData) {
           return circularProgress();
         }
-        Kullanici kullanici = Kullanici.fromDocument(dataSnapshot.data.data());
+        Kullanici kullanici = Kullanici.fromDocument(dataSnapshot.data!);
+        var size = MediaQuery.of(context).size;
         return Container(
           child: Column(
             children: [
               Container(
                 decoration: BoxDecoration(
-                  boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
+                  boxShadow: [
+                    BoxShadow(
+                        offset: Offset(0, 10),
+                        blurRadius: 100,
+                        color: Colors.grey)
+                  ],
                   shape: BoxShape.circle,
                 ),
-                child: CircleAvatar(
-                  radius: 60.0,
-                  backgroundImage: NetworkImage(kullanici.url),
+                child: Padding(
+                  padding: EdgeInsets.only(top: 20),
+                  child: Container(
+                    child: Padding(
+                      padding: const EdgeInsets.all(7.0),
+                      child: Container(
+                        width: (size.width - 3) / 3,
+                        height: (size.height - 3) / 6,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                  offset: Offset(0, 6),
+                                  blurRadius: 2,
+                                  color: Colors.grey)
+                            ],
+                            borderRadius: BorderRadius.circular(15),
+                            image: DecorationImage(
+                                image: NetworkImage(kullanici.url),
+                                fit: BoxFit.cover)),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               SizedBox(
@@ -200,18 +251,18 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      sutunOlustur("Gönderi", gonderiHesapla),
+                      sutunOlustur("Gönderi", gonderiHesapla!),
                       GestureDetector(
                         onTap: () {
                           takipEdilenleriGor();
                         },
-                        child: sutunOlustur("Takip", toplamTakipEdilenHesapla),
+                        child: sutunOlustur("Takip", toplamTakipEdilenHesapla!),
                       ),
                       GestureDetector(
                         onTap: () {
                           takipcileriGor();
                         },
-                        child: sutunOlustur("Takipçi", toplamTakipciHesapla),
+                        child: sutunOlustur("Takipçi", toplamTakipciHesapla!),
                       ),
                     ],
                   ),
@@ -259,9 +310,12 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
           ),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
+            boxShadow: [
+              BoxShadow(
+                  offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)
+            ],
             color: Colors.teal,
-            border: Border.all(color: Colors.tealAccent),
+            border: Border.all(color: Colors.orange.shade50),
             borderRadius: BorderRadius.circular(50),
           ),
         ),
@@ -273,21 +327,36 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
     setState(() {
       takip = false;
     });
-    takipciRef.doc(widget.kullaniciprofilID).collection("takipciler").doc(onlineKullaniciID).get().then((takipci) {
+    takipciRef
+        .doc(widget.kullaniciprofilID)
+        .collection("takipciler")
+        .doc(onlineKullaniciID)
+        .get()
+        .then((takipci) {
       setState(() {
         if (takipci.exists) {
           takipci.reference.delete();
         }
       });
     });
-    takipEdilenRef.doc(onlineKullaniciID).collection("takipEdilenler").doc(widget.kullaniciprofilID).get().then((takipedilen) {
+    takipEdilenRef
+        .doc(onlineKullaniciID)
+        .collection("takipEdilenler")
+        .doc(widget.kullaniciprofilID)
+        .get()
+        .then((takipedilen) {
       setState(() {
         if (takipedilen.exists) {
           takipedilen.reference.delete();
         }
       });
     });
-    bildirimRef.doc(widget.kullaniciprofilID).collection("bildirimler").doc(onlineKullaniciID).get().then((bildirim) {
+    bildirimRef
+        .doc(widget.kullaniciprofilID)
+        .collection("bildirimler")
+        .doc(onlineKullaniciID)
+        .get()
+        .then((bildirim) {
       setState(() {
         if (bildirim.exists) {
           bildirim.reference.delete();
@@ -300,46 +369,71 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
     setState(() {
       takip = true;
     });
-    takipciRef.doc(widget.kullaniciprofilID).collection("takipciler").doc(onlineKullaniciID).set({
+    takipciRef
+        .doc(widget.kullaniciprofilID)
+        .collection("takipciler")
+        .doc(onlineKullaniciID)
+        .set({
       "id": onlineKullaniciID,
     });
-    takipEdilenRef.doc(onlineKullaniciID).collection("takipEdilenler").doc(widget.kullaniciprofilID).set({
+    takipEdilenRef
+        .doc(onlineKullaniciID)
+        .collection("takipEdilenler")
+        .doc(widget.kullaniciprofilID)
+        .set({
       "id": widget.kullaniciprofilID,
     });
-    bildirimRef.doc(widget.kullaniciprofilID).collection("bildirimler").doc(onlineKullaniciID).set({
+    bildirimRef
+        .doc(widget.kullaniciprofilID)
+        .collection("bildirimler")
+        .doc(anlikKullanici!.id)
+        .set({
       "type": "Follow",
+      "commentData": "takip",
       "ownerID": widget.kullaniciprofilID,
-      "username": anlikKullanici.username,
-      "timestamp": DateTime.now(),
-      "userProfileImg": anlikKullanici.url,
-      "userID": onlineKullaniciID,
+      "username": anlikKullanici!.username,
+      "timestamp": timestamp,
+      "userProfileImg": anlikKullanici!.url,
+      "userID": anlikKullanici!.id,
+      "url": "",
+      "postID": "",
     });
   }
 
   kullaniciProfilDuzenle() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => profilDuzenle(onlineKullaniciID: widget.kullaniciprofilID)));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                profilDuzenle(onlineKullaniciID: widget.kullaniciprofilID)));
   }
 
-  Container baslikFonksiyonveButonOlusturma({String baslik, Function fonskiyonIslevi}) {
+  Container baslikFonksiyonveButonOlusturma(
+      {String? baslik, Function? fonskiyonIslevi}) {
     return Container(
       padding: EdgeInsets.only(top: 3),
       child: TextButton(
         onPressed: () {
           setState(() {
-            fonskiyonIslevi();
+            fonskiyonIslevi!();
           });
         },
         child: Container(
           width: 200.0,
           height: 50,
           child: Text(
-            baslik,
-            style: TextStyle(color: takip ? Colors.white : Colors.white, fontWeight: FontWeight.bold),
+            baslik!,
+            style: TextStyle(
+                color: takip! ? Colors.white : Colors.white,
+                fontWeight: FontWeight.bold),
           ),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
-            color: takip ? Colors.brown[100] : Colors.deepOrange[200],
+            boxShadow: [
+              BoxShadow(
+                  offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)
+            ],
+            color: takip! ? Colors.brown[100] : Colors.deepOrange[200],
             border: Border.all(color: Colors.orange.shade50),
             borderRadius: BorderRadius.circular(50),
           ),
@@ -386,9 +480,9 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
   bool get wantKeepAlive => true;
 
   profilGonderisiGoster() {
-    if (yuklenme) {
+    if (yuklenme!) {
       return circularProgress();
-    } else if (gonderiListesi.isEmpty) {
+    } else if (gonderiListesi!.isEmpty) {
       return Container(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -398,7 +492,10 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
               child: Center(
                 child: Text(
                   "Gonderi Yok",
-                  style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -408,7 +505,7 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
     } else if (GonderiStili == "grid") {
       List<gonderiListeleme> gridListesi = [];
       var size = MediaQuery.of(context).size;
-      gonderiListesi.forEach((herbirGonderi) {
+      gonderiListesi!.forEach((herbirGonderi) {
         gridListesi.add(gonderiListeleme(herbirGonderi));
       });
       return GridView.count(
@@ -427,29 +524,40 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
                 height: (size.height - 3) / 6,
                 decoration: BoxDecoration(
                     color: Colors.white,
-                    boxShadow: [BoxShadow(offset: Offset(0, 6), blurRadius: 2, color: Colors.grey)],
+                    boxShadow: [
+                      BoxShadow(
+                          offset: Offset(0, 6),
+                          blurRadius: 2,
+                          color: Colors.grey)
+                    ],
                     borderRadius: BorderRadius.circular(20),
-                    image: DecorationImage(image: NetworkImage(gridListesi[index].gonderi.url), fit: BoxFit.cover)),
+                    image: DecorationImage(
+                        image: NetworkImage(
+                            gridListesi[index].gonderi!.url as String),
+                        fit: BoxFit.cover)),
               ),
             ),
             onTap: () {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          gonderiEkranSayfasi(gonderiID: gridListesi[index].gonderi.postID, kullaniciID: gridListesi[index].gonderi.ownerID)));
+                      builder: (context) => gonderiEkranSayfasi(
+                          gonderiID:
+                              gridListesi[index].gonderi!.postID as String,
+                          kullaniciID:
+                              gridListesi[index].gonderi!.ownerID as String)));
             },
           );
         }),
       );
     } else if (GonderiStili == "list") {
       return Column(
-        children: gonderiListesi,
+        children: gonderiListesi!,
       );
     }
 
     return Column(
-      children: gonderiListesi,
+      children: gonderiListesi!,
     );
   }
 
@@ -458,18 +566,29 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
       yuklenme = true;
     });
 
-    QuerySnapshot<Map<String, dynamic>> querySnapshot =
-        await gonderiRef.doc(widget.kullaniciprofilID).collection("kullaniciGonderi").orderBy("timestamp", descending: true).get();
+    QuerySnapshot querySnapshot = await gonderiRef
+        .doc(widget.kullaniciprofilID)
+        .collection("kullaniciGonderi")
+        .orderBy("timestamp", descending: true)
+        .get();
     setState(() {
       yuklenme = false;
       gonderiHesapla = querySnapshot.docs.length;
-      gonderiListesi = querySnapshot.docs.map((documentsnapshot) => Gonderiler.fromDocument(documentsnapshot.data())).toList();
+      gonderiListesi = querySnapshot.docs
+          .map((documentsnapshot) => Gonderiler.fromDocument(documentsnapshot))
+          .toList();
     });
-    QuerySnapshot<Map<String, dynamic>> querySnapshot1 = await takipEdilenRef.doc(widget.kullaniciprofilID).collection("takipEdilenler").get();
+    QuerySnapshot querySnapshot1 = await takipEdilenRef
+        .doc(widget.kullaniciprofilID)
+        .collection("takipEdilenler")
+        .get();
     setState(() {
       toplamTakipEdilenHesapla = querySnapshot1.docs.length;
     });
-    QuerySnapshot<Map<String, dynamic>> querySnapshot2 = await takipciRef.doc(widget.kullaniciprofilID).collection("takipciler").get();
+    QuerySnapshot querySnapshot2 = await takipciRef
+        .doc(widget.kullaniciprofilID)
+        .collection("takipciler")
+        .get();
     setState(() {
       toplamTakipciHesapla = querySnapshot2.docs.length;
     });
@@ -493,12 +612,16 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
                 ),
               ],
               borderRadius: BorderRadius.circular(20),
-              image: DecorationImage(image: NetworkImage(data["url"]), fit: BoxFit.cover)),
+              image: DecorationImage(
+                  image: NetworkImage(data["url"]), fit: BoxFit.cover)),
         ),
       ),
       onTap: () {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => gonderiEkranSayfasi(gonderiID: data["postID"], kullaniciID: data["ownerID"])));
+            context,
+            MaterialPageRoute(
+                builder: (context) => gonderiEkranSayfasi(
+                    gonderiID: data["postID"], kullaniciID: data["ownerID"])));
       },
     );
   }
@@ -508,7 +631,9 @@ class _profilSayfasiState extends State<profilSayfasi> with AutomaticKeepAliveCl
       padding: EdgeInsets.all(10),
       child: Container(
         decoration: BoxDecoration(
-          boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
+          boxShadow: [
+            BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)
+          ],
           color: Colors.white,
           borderRadius: BorderRadius.circular(30),
         ),

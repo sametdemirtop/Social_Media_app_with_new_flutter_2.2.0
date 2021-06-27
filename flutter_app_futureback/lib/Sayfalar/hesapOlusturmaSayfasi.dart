@@ -11,13 +11,13 @@ class HesapOlusturmaSayfasi extends StatefulWidget {
 class _HesapOlusturmaSayfasiState extends State<HesapOlusturmaSayfasi> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
-  String username;
+  String? username;
   kullaniciadiOlusturma() {
-    final FormState form = _formKey.currentState;
-    if (form.validate()) {
+    final FormState? form = _formKey.currentState;
+    if (form!.validate()) {
       form.save();
 
-      SnackBar snackbar = SnackBar(content: Text("Hoşgeldin" + " " + username));
+      SnackBar snackbar = SnackBar(content: Text("Hoşgeldin" + " " + username!));
       ScaffoldMessenger.of(context).showSnackBar(snackbar);
       Timer(Duration(seconds: 4), () {
         Navigator.pop(context, username);
@@ -51,7 +51,7 @@ class _HesapOlusturmaSayfasiState extends State<HesapOlusturmaSayfasi> {
                 child: TextFormField(
                   style: TextStyle(color: Colors.black),
                   validator: (val) {
-                    if (val.trim().length < 5 || val.isEmpty) {
+                    if (val!.trim().length < 5 || val.isEmpty) {
                       return "Kullanıcı adı çok kısa";
                     } else if (val.trim().length > 15) {
                       return "Kullanıcı adı çok uzun";

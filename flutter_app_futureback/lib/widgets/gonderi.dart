@@ -10,24 +10,32 @@ import 'package:flutter_app_futureback/model/Kullanici.dart';
 
 import 'progress.dart';
 
-bool isLiked;
-bool kaydedildimi;
+bool? isLiked;
+bool? kaydedildimi;
 
 // ignore: must_be_immutable
 class Gonderiler extends StatefulWidget {
-  final String postID;
-  final String ownerID;
+  final String? postID;
+  final String? ownerID;
   final likes;
-  final String username;
-  final String description;
-  final String location;
-  final String url;
+  final String? username;
+  final String? description;
+  final String? location;
+  final String? url;
   final kaydedilenler;
 
   bool yuklenme = false;
 
-  Gonderiler({this.postID, this.ownerID, this.likes, this.username, this.description, this.location, this.url, this.kaydedilenler});
-  factory Gonderiler.fromDocument(Map<String, dynamic> doc) {
+  Gonderiler(
+      {this.postID,
+      this.ownerID,
+      this.likes,
+      this.username,
+      this.description,
+      this.location,
+      this.url,
+      this.kaydedilenler});
+  factory Gonderiler.fromDocument(DocumentSnapshot doc) {
     return Gonderiler(
       postID: doc['postID'],
       ownerID: doc['ownerID'],
@@ -54,46 +62,53 @@ class Gonderiler extends StatefulWidget {
 
   @override
   _GonderilerState createState() => _GonderilerState(
-      postID: this.postID,
-      ownerID: this.ownerID,
+      postID: this.postID!,
+      ownerID: this.ownerID!,
       likes: this.likes,
-      username: this.username,
-      description: this.description,
-      location: this.location,
-      url: this.url,
+      username: this.username!,
+      description: this.description!,
+      location: this.location!,
+      url: this.url!,
       likeCount: toplamBegeniSayisi(this.likes),
       kaydedilenler: this.kaydedilenler);
 }
 
 class _GonderilerState extends State<Gonderiler> {
-  final String postID;
-  final String ownerID;
-  Map likes;
-  final String username;
-  final String description;
-  final String location;
-  final String url;
-  int likeCount;
-  bool showHeart = false;
-  final String onlineUserID = anlikKullanici.id;
-  List<Gonderiler> gonderiListesi;
-  Map kaydedilenler;
+  final String? postID;
+  final String? ownerID;
+  Map? likes;
+  final String? username;
+  final String? description;
+  final String? location;
+  final String? url;
+  int? likeCount;
+  bool? showHeart = false;
+  final String? onlineUserID = anlikKullanici!.id;
+  List<Gonderiler>? gonderiListesi;
+  Map? kaydedilenler;
 
-  int gonderiHesapla;
+  int? gonderiHesapla;
 
   _GonderilerState(
-      {this.postID, this.ownerID, this.likes, this.username, this.description, this.location, this.url, this.likeCount, this.kaydedilenler});
+      {this.postID,
+      this.ownerID,
+      this.likes,
+      this.username,
+      this.description,
+      this.location,
+      this.url,
+      this.likeCount,
+      this.kaydedilenler});
   @override
   Widget build(BuildContext context) {
-    isLiked = (likes[anlikKullanici.id.toString()] == true);
-    kaydedildimi = (kaydedilenler[anlikKullanici.id.toString()] == true);
+    isLiked = (likes![anlikKullanici!.id.toString()] == true);
+    kaydedildimi = (kaydedilenler![anlikKullanici!.id.toString()] == true);
     return Padding(
       padding: EdgeInsets.only(top: 35, right: 20, left: 20),
       child: Container(
-        decoration: BoxDecoration(
-            boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.white),
+        decoration: BoxDecoration(boxShadow: [
+          BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)
+        ], borderRadius: BorderRadius.circular(20), color: Colors.white),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -107,30 +122,46 @@ class _GonderilerState extends State<Gonderiler> {
   }
 
   gonderiBaslikOlustur() {
-    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+    return FutureBuilder<DocumentSnapshot>(
         future: kullaniciRef.doc(ownerID).get(),
         builder: (context, dataSnapshot) {
           if (!dataSnapshot.hasData) {
             return circularProgress();
           }
-          Kullanici kullanici1 = Kullanici.fromDocument(dataSnapshot.data.data());
+          Kullanici kullanici1 = Kullanici.fromDocument(dataSnapshot.data!);
           bool isPostOwner = onlineUserID == ownerID;
           return ListTile(
             leading: GestureDetector(
-              onTap: () => kullaniciProfiliGoster(context, kullaniciProfilID: ownerID),
-              child: CircleAvatar(
-                backgroundImage: NetworkImage(kullanici1.url),
+              onTap: () =>
+                  kullaniciProfiliGoster(context, kullaniciProfilID: ownerID),
+              child: Container(
+                height: 45,
+                width: 45,
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.white,
+                      image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: NetworkImage(kullanici1.url)),
+                    ),
+                  ),
+                ),
               ),
             ),
             title: GestureDetector(
-              onTap: () => kullaniciProfiliGoster(context, kullaniciProfilID: kullanici1.id),
+              onTap: () => kullaniciProfiliGoster(context,
+                  kullaniciProfilID: kullanici1.id),
               child: Text(
                 kullanici1.username,
-                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
               ),
             ),
             subtitle: Text(
-              location,
+              location!,
               style: TextStyle(color: Colors.black),
             ),
             trailing: isPostOwner
@@ -159,14 +190,18 @@ class _GonderilerState extends State<Gonderiler> {
             ),
             children: [
               SimpleDialogOption(
-                child: Text("Sil", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                child: Text("Sil",
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.bold)),
                 onPressed: () {
                   kullaniciGonderiSilme();
                   Navigator.pop(context);
                 },
               ),
               SimpleDialogOption(
-                child: Text("Çık", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                child: Text("Çık",
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.bold)),
                 onPressed: () {
                   Navigator.pop(context);
                 },
@@ -177,7 +212,12 @@ class _GonderilerState extends State<Gonderiler> {
   }
 
   kullaniciGonderiSilme() async {
-    await gonderiRef.doc(ownerID).collection("kullaniciGonderi").doc(postID).get().then((value) async {
+    await gonderiRef
+        .doc(ownerID)
+        .collection("kullaniciGonderi")
+        .doc(postID)
+        .get()
+        .then((value) async {
       if (value.exists) {
         value.reference.delete();
       }
@@ -185,19 +225,25 @@ class _GonderilerState extends State<Gonderiler> {
       setState(() {});
     });
     FirebaseStorage.instance.ref().child("post_$postID.jpg").delete();
-    QuerySnapshot querySnapshot = await bildirimRef.doc(ownerID).collection("bildirimler").where("postID", isEqualTo: postID).get();
+    QuerySnapshot querySnapshot = await bildirimRef
+        .doc(ownerID)
+        .collection("bildirimler")
+        .where("postID", isEqualTo: postID)
+        .get();
     querySnapshot.docs.forEach((document) {
       if (document.exists) {
         document.reference.delete();
       }
     });
-    QuerySnapshot commentquerySnapshot = await yorumRef.doc(postID).collection("yorumlar").get();
+    QuerySnapshot commentquerySnapshot =
+        await yorumRef.doc(postID).collection("yorumlar").get();
     commentquerySnapshot.docs.forEach((document) {
       if (document.exists) {
         document.reference.delete();
       }
     });
-    QuerySnapshot streamSnapshot = await akisRef.where("postID", isEqualTo: postID).get();
+    QuerySnapshot streamSnapshot =
+        await akisRef.where("postID", isEqualTo: postID).get();
     streamSnapshot.docs.forEach((document) {
       if (document.exists) {
         document.reference.delete();
@@ -211,9 +257,9 @@ class _GonderilerState extends State<Gonderiler> {
       child: Stack(
         children: [
           Image.network(
-            url,
+            url!,
           ),
-          showHeart
+          showHeart!
               ? Icon(
                   Icons.favorite,
                   size: 140,
@@ -228,12 +274,17 @@ class _GonderilerState extends State<Gonderiler> {
   begeniSil() {
     bool isNotPostOwner = onlineUserID != ownerID;
     if (isNotPostOwner) {
-      bildirimRef.doc(ownerID).collection("bildirimler").doc(postID).get().then((begeni) => {
-            if (begeni.exists)
-              {
-                begeni.reference.delete(),
-              }
-          });
+      bildirimRef
+          .doc(ownerID)
+          .collection("bildirimler")
+          .doc(postID)
+          .get()
+          .then((begeni) => {
+                if (begeni.exists)
+                  {
+                    begeni.reference.delete(),
+                  }
+              });
     }
   }
 
@@ -242,36 +293,46 @@ class _GonderilerState extends State<Gonderiler> {
     if (isNotPostOwner) {
       bildirimRef.doc(ownerID).collection("bildirimler").doc(postID).set({
         "type": 'like',
-        "username": anlikKullanici.username,
-        "userID": anlikKullanici.id,
-        "timestamp": DateTime.now(),
+        "username": anlikKullanici!.username,
+        "userID": anlikKullanici!.id,
+        "timestamp": timestamp,
         "url": url,
         "postID": postID,
-        "userProfileImg": anlikKullanici.url,
+        "userProfileImg": anlikKullanici!.url,
+        "commentData": "",
+        "ownerID": ownerID,
       });
     }
   }
 
   kullaniciGonderiBegeniKontrolu() {
-    var kullaniciID = anlikKullanici.id;
-    bool _liked = (likes[kullaniciID] == true);
+    var kullaniciID = anlikKullanici!.id;
+    bool _liked = (likes![kullaniciID] == true);
     if (_liked) {
-      gonderiRef.doc(ownerID).collection("kullaniciGonderi").doc(postID).update({"likes.$kullaniciID": false});
+      gonderiRef
+          .doc(ownerID)
+          .collection("kullaniciGonderi")
+          .doc(postID)
+          .update({"likes.$kullaniciID": false});
       akisRef.doc(postID).update({"likes.$kullaniciID": false});
       begeniSil();
       setState(() {
-        likeCount = likeCount - 1;
+        likeCount = likeCount! - 1;
         isLiked = false;
-        likes[kullaniciID] = false;
+        likes![kullaniciID] = false;
       });
     } else if (!_liked) {
-      gonderiRef.doc(ownerID).collection("kullaniciGonderi").doc(postID).update({"likes.$kullaniciID": true});
+      gonderiRef
+          .doc(ownerID)
+          .collection("kullaniciGonderi")
+          .doc(postID)
+          .update({"likes.$kullaniciID": true});
       akisRef.doc(postID).update({"likes.$kullaniciID": true});
       begeniEkle();
       setState(() {
-        likeCount = likeCount + 1;
+        likeCount = likeCount! + 1;
         isLiked = true;
-        likes[kullaniciID] = true;
+        likes![kullaniciID] = true;
         showHeart = true;
         Timer(Duration(milliseconds: 800), () {
           setState(() {
@@ -285,55 +346,79 @@ class _GonderilerState extends State<Gonderiler> {
   kaydetmeSil() {
     bool isNotPostOwner = onlineUserID != ownerID;
     if (isNotPostOwner) {
-      bildirimRef.doc(ownerID).collection("bildirimler").doc(postID).get().then((kaydetme) => {
-            if (kaydetme.exists)
-              {
-                kaydetme.reference.delete(),
-              }
-          });
+      bildirimRef
+          .doc(ownerID)
+          .collection("bildirimler")
+          .doc(onlineUserID! + postID!)
+          .get()
+          .then((kaydetme) => {
+                if (kaydetme.exists)
+                  {
+                    kaydetme.reference.delete(),
+                  }
+              });
     }
   }
 
   kaydetmeEkle() {
     bool isNotPostOwner = onlineUserID != ownerID;
     if (isNotPostOwner) {
-      bildirimRef.doc(ownerID).collection("bildirimler").doc(postID).set({
+      bildirimRef
+          .doc(ownerID)
+          .collection("bildirimler")
+          .doc(onlineUserID! + postID!)
+          .set({
         "type": 'kaydetme',
-        "username": anlikKullanici.username,
-        "userID": anlikKullanici.id,
-        "timestamp": DateTime.now(),
+        "username": anlikKullanici!.username,
+        "userID": anlikKullanici!.id,
+        "timestamp": timestamp,
         "url": url,
         "postID": postID,
-        "userProfileImg": anlikKullanici.url,
+        "userProfileImg": anlikKullanici!.url,
+        "commentData": "kaydetme",
+        "ownerID": ownerID,
       });
     }
   }
 
   kullaniciKartKaydetmeKontrolu() async {
-    var kullaniciID = anlikKullanici.id;
-    bool _kayit = (kaydedilenler[kullaniciID] == true);
+    var kullaniciID = anlikKullanici!.id;
+    bool _kayit = (kaydedilenler![kullaniciID] == true);
     if (_kayit) {
-      gonderiRef.doc(ownerID).collection("kullaniciGonderi").doc(postID).update({"kaydedilenler.$kullaniciID": false});
+      gonderiRef
+          .doc(ownerID)
+          .collection("kullaniciGonderi")
+          .doc(postID)
+          .update({"kaydedilenler.$kullaniciID": false});
       akisRef.doc(postID).update({"kaydedilenler.$kullaniciID": false});
-      kartlarRef.doc(anlikKullanici.id).collection("Kaydedilen Kartlar").doc(postID).get().then((kaydetme) => {
-            if (kaydetme.exists)
-              {
-                kaydetme.reference.delete(),
-              }
-          });
+      kartlarRef
+          .doc(anlikKullanici!.id)
+          .collection("Kaydedilen Kartlar")
+          .doc(postID)
+          .get()
+          .then((kaydetme) => {
+                if (kaydetme.exists)
+                  {
+                    kaydetme.reference.delete(),
+                  }
+              });
       kaydetmeSil();
       setState(() {
         kaydedildimi = false;
-        kaydedilenler[kullaniciID] = false;
+        kaydedilenler![kullaniciID] = false;
       });
     } else if (!_kayit) {
-      gonderiRef.doc(ownerID).collection("kullaniciGonderi").doc(postID).update({"kaydedilenler.$kullaniciID": true});
+      gonderiRef
+          .doc(ownerID)
+          .collection("kullaniciGonderi")
+          .doc(postID)
+          .update({"kaydedilenler.$kullaniciID": true});
       akisRef.doc(postID).update({"kaydedilenler.$kullaniciID": true});
       kaydetmeEkle();
       kartKaydet();
       setState(() {
         kaydedildimi = true;
-        kaydedilenler[kullaniciID] = true;
+        kaydedilenler![kullaniciID] = true;
       });
     }
   }
@@ -352,7 +437,7 @@ class _GonderilerState extends State<Gonderiler> {
                 kullaniciGonderiBegeniKontrolu();
               },
               child: Icon(
-                isLiked ? Icons.favorite : Icons.favorite_border,
+                isLiked! ? Icons.favorite : Icons.favorite_border,
                 size: 28,
                 color: Colors.deepOrange[200],
               ),
@@ -362,7 +447,8 @@ class _GonderilerState extends State<Gonderiler> {
             ),
             GestureDetector(
               onTap: () {
-                yorumlariGoster(context, postID: postID, ownerID: ownerID, url: url);
+                yorumlariGoster(context,
+                    postID: postID, ownerID: ownerID, url: url);
               },
               child: Icon(
                 Icons.messenger_outline_rounded,
@@ -376,14 +462,17 @@ class _GonderilerState extends State<Gonderiler> {
             GestureDetector(
               onTap: () {
                 if (kaydedildimi == false) {
-                  SnackBar snackBar = SnackBar(content: Text("Kart Kaydedildi"));
+                  SnackBar snackBar =
+                      SnackBar(content: Text("Kart Kaydedildi"));
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 }
                 kullaniciKartKaydetmeKontrolu();
                 kartKaydet();
               },
               child: Icon(
-                kaydedildimi == true ? Icons.bookmarks : Icons.bookmarks_outlined,
+                kaydedildimi == true
+                    ? Icons.bookmarks
+                    : Icons.bookmarks_outlined,
                 size: 28,
                 color: Colors.black87,
               ),
@@ -396,7 +485,8 @@ class _GonderilerState extends State<Gonderiler> {
               margin: EdgeInsets.only(left: 20.0),
               child: Text(
                 "$likeCount beğenme",
-                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -407,12 +497,15 @@ class _GonderilerState extends State<Gonderiler> {
             Container(
               margin: EdgeInsets.only(left: 20),
               child: GestureDetector(
-                  onTap: () => kullaniciProfiliGoster(context, kullaniciProfilID: ownerID),
-                  child: Text("$username", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold))),
+                  onTap: () => kullaniciProfiliGoster(context,
+                      kullaniciProfilID: ownerID),
+                  child: Text("$username",
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold))),
             ),
             Expanded(
               child: Text(
-                " " + description,
+                " " + description!,
                 style: TextStyle(
                   color: Colors.black,
                 ),
@@ -420,20 +513,25 @@ class _GonderilerState extends State<Gonderiler> {
             ),
           ],
         ),
-        FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          future: yorumRef.doc(postID).collection("yorumlar").orderBy("timestamp", descending: false).get(),
+        FutureBuilder<QuerySnapshot>(
+          future: yorumRef
+              .doc(postID)
+              .collection("yorumlar")
+              .orderBy("timestamp", descending: false)
+              .get(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return circularProgress();
             }
             List<yorum> yorumlar = [];
-            snapshot.data.docs.forEach((document) {
-              yorumlar.add(yorum.fromDocument(document.data()));
+            snapshot.data!.docs.forEach((document) {
+              yorumlar.add(yorum.fromDocument(document));
             });
             return yorumlar.length > 0
                 ? GestureDetector(
                     onTap: () {
-                      yorumlariGoster(context, postID: postID, ownerID: ownerID, url: url);
+                      yorumlariGoster(context,
+                          postID: postID, ownerID: ownerID, url: url);
                     },
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -457,21 +555,26 @@ class _GonderilerState extends State<Gonderiler> {
     );
   }
 
-  yorumlariGoster(BuildContext context, {String postID, String url, String ownerID}) {
+  yorumlariGoster(BuildContext context,
+      {String? postID, String? url, String? ownerID}) {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
       return yorumSayfasi(postID: postID, postOwnerID: ownerID, postUrl: url);
     }));
   }
 
   kartKaydet() async {
-    await kartlarRef.doc(anlikKullanici.id).collection("Kaydedilen Kartlar").doc(postID).set({
+    await kartlarRef
+        .doc(anlikKullanici!.id)
+        .collection("Kaydedilen Kartlar")
+        .doc(postID)
+        .set({
       "postID": postID,
       "ownerID": ownerID,
       "username": username,
     });
   }
 
-  kullaniciProfiliGoster(BuildContext context, {String kullaniciProfilID}) {
+  kullaniciProfiliGoster(BuildContext context, {String? kullaniciProfilID}) {
     Navigator.push(
         context,
         MaterialPageRoute(

@@ -8,8 +8,8 @@ import 'package:flutter_app_futureback/widgets/progress.dart';
 
 // ignore: camel_case_types
 class takipEdilenler extends StatefulWidget {
-  final String kullaniciprofilID;
-  final String anlikKullaniciID;
+  final String? kullaniciprofilID;
+  final String? anlikKullaniciID;
   takipEdilenler({this.kullaniciprofilID, this.anlikKullaniciID});
   @override
   _takipEdilenlerState createState() => _takipEdilenlerState();
@@ -17,7 +17,7 @@ class takipEdilenler extends StatefulWidget {
 
 // ignore: camel_case_types
 class _takipEdilenlerState extends State<takipEdilenler> {
-  List<tEdilen> takipEdilenKullanicilar = [];
+  List<tEdilen>? takipEdilenKullanicilar = [];
   @override
   void initState() {
     super.initState();
@@ -34,9 +34,13 @@ class _takipEdilenlerState extends State<takipEdilenler> {
   }
 
   takipEdilenKullanicilarAnlik() async {
-    QuerySnapshot<Map<String, dynamic>> snapshot = await takipEdilenRef.doc(widget.anlikKullaniciID).collection("takipEdilenler").get();
+    QuerySnapshot snapshot = await takipEdilenRef
+        .doc(widget.anlikKullaniciID)
+        .collection("takipEdilenler")
+        .get();
 
-    List<tEdilen> kullanicires = snapshot.docs.map((doc) => tEdilen.fromDocument(doc.data())).toList();
+    List<tEdilen> kullanicires =
+        snapshot.docs.map((doc) => tEdilen.fromDocument(doc)).toList();
 
     setState(() {
       this.takipEdilenKullanicilar = kullanicires;
@@ -44,10 +48,13 @@ class _takipEdilenlerState extends State<takipEdilenler> {
   }
 
   takipEdilenKullanicilarKullanici() async {
-    QuerySnapshot<Map<String, dynamic>> snapshot = await takipEdilenRef.doc(widget.kullaniciprofilID).collection("takipEdilenler").get();
+    QuerySnapshot snapshot = await takipEdilenRef
+        .doc(widget.kullaniciprofilID)
+        .collection("takipEdilenler")
+        .get();
 
-    List<tEdilen> kullanicires = snapshot.docs.map((doc) => tEdilen.fromDocument(doc.data())).toList();
-
+    List<tEdilen>? kullanicires =
+        snapshot.docs.map((doc) => tEdilen.fromDocument(doc)).toList();
     setState(() {
       this.takipEdilenKullanicilar = kullanicires;
     });
@@ -61,12 +68,12 @@ class _takipEdilenlerState extends State<takipEdilenler> {
           if (!dataSnapshot.hasData) {
             return circularProgress();
           }
-          List<KullaniciSonuc> kullaniciAramaSonucu = [];
-          dataSnapshot.data.docs.forEach((documents) {
-            Kullanici herbirKullanici = Kullanici.fromDocument(documents.data());
-            for (var doc in takipEdilenKullanicilar) {
+          List<KullaniciSonuc>? kullaniciAramaSonucu = [];
+          dataSnapshot.data!.docs.forEach((documents) {
+            Kullanici? herbirKullanici = Kullanici.fromDocument(documents);
+            for (var doc in takipEdilenKullanicilar!) {
               if (doc.id == herbirKullanici.id) {
-                KullaniciSonuc userResult = KullaniciSonuc(herbirKullanici);
+                KullaniciSonuc? userResult = KullaniciSonuc(herbirKullanici);
                 kullaniciAramaSonucu.add(userResult);
               }
             }
@@ -91,9 +98,9 @@ class _takipEdilenlerState extends State<takipEdilenler> {
 class tEdilen {
   final String id;
 
-  tEdilen({this.id});
+  tEdilen({required this.id});
 
-  factory tEdilen.fromDocument(Map<String, dynamic> doc) {
+  factory tEdilen.fromDocument(DocumentSnapshot doc) {
     return tEdilen(
       id: doc['id'],
     );

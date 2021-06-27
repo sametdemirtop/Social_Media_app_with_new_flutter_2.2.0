@@ -2,25 +2,23 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app_futureback/model/Kullanici.dart';
+import 'package:flutter_app_futureback/widgets/progress.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
 
 import 'GirisEkran.dart';
+import 'HesapOlusturmaSayfasi2.dart';
 import 'hesapOlusturmaSayfasi.dart';
 
-final GoogleSignIn googlegiris = GoogleSignIn(
-  scopes: [
-    'email',
-    'https://www.googleapis.com/auth/contacts.readonly',
-  ],
-);
+Kullanici? anlikKullanici;
+
 final kullaniciRef = FirebaseFirestore.instance.collection("Kullanicilar");
 final bildirimRef = FirebaseFirestore.instance.collection("Bildirimler");
 final yorumRef = FirebaseFirestore.instance.collection("Yorumlar");
@@ -34,7 +32,6 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 FirebaseMessaging messaging = FirebaseMessaging.instance;
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 final DateTime timestamp = DateTime.now();
-Kullanici anlikKullanici;
 
 /// Create a [AndroidNotificationChannel] for heads up notifications
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
@@ -43,11 +40,13 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'Test Description.', // description
   importance: Importance.high,
 );
+final GoogleSignIn? googlegiris = GoogleSignIn();
 
 class AnaSayfa extends StatefulWidget {
   final bool girdimi;
+
   AnaSayfa({
-    this.girdimi,
+    required this.girdimi,
   });
   final _AnaSayfaState child = _AnaSayfaState(girdimi: false);
   @override
@@ -64,13 +63,18 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
 
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _usernameController = TextEditingController();
   final formKey = GlobalKey<FormState>();
+  final Future<FirebaseApp> _initFirebaseSdk = Firebase.initializeApp();
   bool isToogle = false;
 
-  String _token = "";
+  bool kullaniciOnline = false;
+
+  //String _token = "";
 
   _AnaSayfaState({
-    this.girdimi,
+    required this.girdimi,
   });
 
   /*String constructFCMPayload(String token) {
@@ -106,8 +110,8 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
       }
     });*/
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      RemoteNotification notification = message.notification;
-      AndroidNotification android = message.notification?.android;
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
       if (notification != null && android != null) {
         flutterLocalNotificationsPlugin.show(
             notification.hashCode,
@@ -138,22 +142,29 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
     });*/
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _nameController = TextEditingController();
+    _usernameController = TextEditingController();
 
-    googlegiris.onCurrentUserChanged.listen((googleHesap) {
+    googlegiris!.onCurrentUserChanged.listen((googleHesap) {
       setState(() {
-        kullaniciKontrol(googleHesap);
+        kullaniciKontrol(googleHesap!);
       });
     }, onError: (gHata) {
       print("Hata Mesaj: " + gHata.toString());
     });
-    googlegiris.signInSilently();
-    /*googlegiris.signInSilently(suppressErrors: false).then((googleHesap2) {
-      setState(() {
-        kullaniciKontrol(googleHesap2);
-      });
-    }).catchError((gHata) {
-      print("Hata Mesaj 2: " + gHata.toString());
-    });*/
+
+    googlegiris!.isSignedIn().then((isSignedIn) async {
+      if (isSignedIn == true) {
+        googlegiris!.signInSilently(suppressErrors: false).then((googleHesap2) {
+          setState(() {
+            kullaniciKontrol(googleHesap2!);
+          });
+        }).catchError((gHata) {
+          print("Hata Mesaj 2: " + gHata.toString());
+        });
+      }
+    });
+    firebaseonAuth();
     super.initState();
   }
 
@@ -161,7 +172,36 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _nameController.dispose();
+    _usernameController.dispose();
     super.dispose();
+  }
+
+  firebaseonAuth() {
+    return FutureBuilder(
+        future: _initFirebaseSdk,
+        builder: (_, snapshot) {
+          if (snapshot.hasError) {
+            print("Hata firebaseonAuth 2: ");
+          }
+
+          if (snapshot.connectionState == ConnectionState.done) {
+            // Assign listener after the SDK is initialized successfully
+            FirebaseAuth.instance.authStateChanges().listen((User? user) {
+              if (user == null) {
+                setState(() {
+                  girdimi = false;
+                });
+              } else {
+                setState(() {
+                  girdimi = true;
+                });
+              }
+            });
+          }
+
+          return circularProgress();
+        });
   }
 
   static void showNotification(RemoteMessage message) async {
@@ -171,7 +211,7 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
     await flutterLocalNotificationsPlugin.show(0, message.data['title'], message.data['message'], platformChannelSpecifics, payload: 'item x');
   }
 
-  Future<void> sendPushMessage() async {
+  /*Future<void> sendPushMessage() async {
     if (_token == null) {
       print('Unable to send FCM message, no token exists.');
       return;
@@ -189,15 +229,15 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
     } catch (e) {
       print(e);
     }
-  }
+  }*/
 
   kullaniciGiris() {
     setState(() {
-      googlegiris.signIn();
+      googlegiris!.signIn();
     });
   }
 
-  kullaniciKontrol(GoogleSignInAccount girisHesap) async {
+  kullaniciKontrol(GoogleSignInAccount? girisHesap) async {
     if (girisHesap != null) {
       await kullaniciFireStoreKayit();
       setState(() {
@@ -293,6 +333,7 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
     }
   }
 
+  // ignore: non_constant_identifier_names
   Padding Login() {
     return Padding(
       padding: EdgeInsets.only(right: 20, left: 20),
@@ -326,7 +367,7 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                     ),
                     TextFormField(
                       controller: _emailController,
-                      validator: (val) => val.isNotEmpty ? null : "Please enter a mail address",
+                      validator: (val) => val!.isNotEmpty ? null : "Please enter a mail address",
                       decoration: InputDecoration(
                         hintText: "E-mail",
                         prefixIcon: Icon(Icons.mail),
@@ -341,7 +382,7 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                     ),
                     TextFormField(
                       controller: _passwordController,
-                      validator: (val) => val.length < 6 ? "Enter more than 6 char " : null,
+                      validator: (val) => val!.length < 6 ? "Enter more than 6 char " : null,
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: "Password",
@@ -357,7 +398,7 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                     ),
                     MaterialButton(
                       onPressed: () {
-                        if (formKey.currentState.validate()) {
+                        if (formKey.currentState!.validate()) {
                           debugPrint("Email= " + _emailController.text);
                           debugPrint("pass= " + _passwordController.text);
                           signIn(_emailController.text, _passwordController.text).then((value) {
@@ -436,6 +477,7 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
     );
   }
 
+  // ignore: non_constant_identifier_names
   Padding Register() {
     return Padding(
       padding: EdgeInsets.only(right: 20, left: 20),
@@ -468,8 +510,38 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                       height: 15,
                     ),
                     TextFormField(
+                      controller: _usernameController,
+                      validator: (val) => val!.length <= 4 ? "Enter 4 char or more than 4 char " : null,
+                      decoration: InputDecoration(
+                        hintText: "Username",
+                        prefixIcon: Icon(Icons.person_pin_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.deepOrange, width: 6),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    TextFormField(
+                      controller: _nameController,
+                      validator: (val) => val!.length <= 3 ? "Enter 3 char or more than 3 char " : null,
+                      decoration: InputDecoration(
+                        hintText: "Name",
+                        prefixIcon: Icon(Icons.person),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.deepOrange, width: 6),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    TextFormField(
                       controller: _emailController,
-                      validator: (val) => val.isNotEmpty ? null : "Please enter a mail address",
+                      validator: (val) => val!.isNotEmpty ? null : "Please enter a mail address",
                       decoration: InputDecoration(
                         hintText: "E-mail",
                         prefixIcon: Icon(Icons.mail),
@@ -484,7 +556,7 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                     ),
                     TextFormField(
                       controller: _passwordController,
-                      validator: (val) => val.length < 6 ? "Enter more than 6 char " : null,
+                      validator: (val) => val!.length < 6 ? "Enter more than 6 char " : null,
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: "Password",
@@ -500,10 +572,10 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                     ),
                     MaterialButton(
                       onPressed: () {
-                        if (formKey.currentState.validate()) {
+                        if (formKey.currentState!.validate()) {
                           debugPrint("Email= " + _emailController.text);
                           debugPrint("pass= " + _passwordController.text);
-                          createPerson(_emailController.text, _passwordController.text).then((value) {
+                          createPerson(_emailController.text, _passwordController.text, _nameController.text, _usernameController.text).then((value) {
                             setState(() {
                               isToogle = false;
                             });
@@ -543,32 +615,6 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                         )
                       ],
                     ),
-                    Center(
-                      child: Text(
-                        "OR",
-                        style: TextStyle(color: Colors.black.withOpacity(0.5), fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          kullaniciGiris();
-                        });
-                      },
-                      child: Container(
-                        width: 270.0,
-                        height: 65.0,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(150),
-                          image: DecorationImage(
-                            image: AssetImage("assets/images/google_signin_button1.png"),
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -580,8 +626,8 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
   }
 
   kullaniciFireStoreKayit() async {
-    final GoogleSignInAccount gAnlikKullanici = googlegiris.currentUser;
-    DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await kullaniciRef.doc(gAnlikKullanici.id).get();
+    final GoogleSignInAccount? gAnlikKullanici = googlegiris!.currentUser;
+    DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await kullaniciRef.doc(gAnlikKullanici!.id).get();
     if (!documentSnapshot.exists) {
       final username = await Navigator.push(context, MaterialPageRoute(builder: (context) => HesapOlusturmaSayfasi()));
 
@@ -594,19 +640,19 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
         "biography": "",
         "timestamp": timestamp,
       });
-      await takipciRef.doc(anlikKullanici.id).collection("takipciler").doc(anlikKullanici.id).set({});
-      documentSnapshot = await kullaniciRef.doc(anlikKullanici.id).get();
+      //await takipciRef.doc(anlikKullanici.id).collection("takipciler").doc(anlikKullanici.id).set({});
+      documentSnapshot = await kullaniciRef.doc(anlikKullanici!.id).get();
     }
-    anlikKullanici = Kullanici.fromDocument(documentSnapshot.data());
+    anlikKullanici = Kullanici.fromDocument(documentSnapshot);
   }
 
-  Future<User> signIn(String email, String password) async {
+  Future<User?> signIn(String email, String password) async {
     var user = await _auth.signInWithEmailAndPassword(email: email, password: password);
-    DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await kullaniciRef.doc(user.user.uid).get();
+    DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await kullaniciRef.doc(user.user!.uid).get();
     if (!documentSnapshot.exists) {
-      documentSnapshot = await kullaniciRef.doc(user.user.uid).get();
+      documentSnapshot = await kullaniciRef.doc(user.user!.uid).get();
     }
-    anlikKullanici = Kullanici.fromDocument(documentSnapshot.data());
+    anlikKullanici = Kullanici.fromDocument(documentSnapshot);
     return user.user;
   }
 
@@ -614,24 +660,31 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
     return await _auth.signOut();
   }
 
-  Future<User> createPerson(String email, String password) async {
+  // ignore: non_constant_identifier_names
+  Future<User?> createPerson(String email, String password, String name, String username) async {
     var user = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-    DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await kullaniciRef.doc(user.user.uid).get();
+    DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await kullaniciRef.doc(user.user!.uid).get();
     if (!documentSnapshot.exists) {
-      final username = await Navigator.push(context, MaterialPageRoute(builder: (context) => HesapOlusturmaSayfasi()));
-      kullaniciRef.doc(user.user.uid).set({
-        "id": user.user.uid,
-        "profileName": username,
+      final urlIndirme = await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => HesapOlusturmaSayfasi2(
+                    kullanici: anlikKullanici,
+                  )));
+
+      kullaniciRef.doc(user.user!.uid).set({
+        "id": user.user!.uid,
+        "profileName": name,
         "username": username,
-        "url": "https://www.google.com.tr/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png",
-        "email": documentSnapshot.data()['email'],
+        "url": urlIndirme,
+        "email": user.user!.email,
         "biography": "",
         "timestamp": timestamp,
       });
-      await takipciRef.doc(user.user.uid).collection("takipciler").doc(user.user.uid).set({});
-      documentSnapshot = await kullaniciRef.doc(user.user.uid).get();
+      //await takipciRef.doc(user.user.uid).collection("takipciler").doc(user.user.uid).set({});
+      documentSnapshot = await kullaniciRef.doc(user.user!.uid).get();
     }
-    anlikKullanici = Kullanici.fromDocument(documentSnapshot.data());
+    anlikKullanici = Kullanici.fromDocument(documentSnapshot);
     return user.user;
   }
 
