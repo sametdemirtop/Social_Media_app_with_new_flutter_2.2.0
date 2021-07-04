@@ -39,7 +39,7 @@ class _gonderiEkranSayfasiState extends State<gonderiEkranSayfasi> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       appBar: baslik(context, strBaslik: ""),
       body: Container(
         child: fotografGoruntuleme(),

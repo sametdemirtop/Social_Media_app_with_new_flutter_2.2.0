@@ -7,6 +7,8 @@ class Kullanici {
   final String url;
   final String email;
   final String biography;
+  final String chattingWith;
+  final String pushToken;
 
   Kullanici({
     required this.id,
@@ -15,6 +17,8 @@ class Kullanici {
     required this.url,
     required this.email,
     required this.biography,
+    required this.chattingWith,
+    required this.pushToken,
   });
 
   factory Kullanici.fromDocument(DocumentSnapshot doc) {
@@ -25,6 +29,8 @@ class Kullanici {
       url: doc['url'],
       profileName: doc['profileName'],
       biography: doc['biography'],
+      chattingWith: doc['chattingWith'],
+      pushToken: doc['pushToken'],
     );
   }
 }

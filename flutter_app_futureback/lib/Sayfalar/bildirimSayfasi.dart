@@ -38,24 +38,11 @@ class _bildirimSayfasiState extends State<bildirimSayfasi>
     });
   }
 
-  /*bildirimOlustur() {
-    // ignore: unnecessary_null_comparison
-    if (tumBildirimler!.isEmpty) {
-      return Center(
-        child: Text("Bildirim Yok"),
-      );
-    } else {
-      return ListView(
-        children: tumBildirimler!,
-      );
-    }
-  }*/
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       appBar: baslik(context, strBaslik: "Bildirimler", geriButonuYokSay: true),
       body: Container(
         child: RefreshIndicator(

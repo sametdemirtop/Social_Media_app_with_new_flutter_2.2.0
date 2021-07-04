@@ -157,7 +157,7 @@ class _profilDuzenleState extends State<profilDuzenle> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       key: _scaffoldKey,
       appBar: AppBar(
         automaticallyImplyLeading: false,

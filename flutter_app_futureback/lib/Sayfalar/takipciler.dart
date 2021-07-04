@@ -95,13 +95,23 @@ class _takipcilerState extends State<takipciler> {
 
 // ignore: camel_case_types
 class takipci {
-  final String? id;
+  final String id;
+  final String username;
+  final String url;
+  final String profileName;
 
-  takipci({this.id});
+  takipci(
+      {required this.id,
+      required this.username,
+      required this.url,
+      required this.profileName});
 
   factory takipci.fromDocument(DocumentSnapshot doc) {
     return takipci(
       id: doc['id'],
+      username: doc['username'],
+      url: doc['url'],
+      profileName: doc['profileName'],
     );
   }
 }

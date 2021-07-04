@@ -49,7 +49,7 @@ class _yorumSayfasiState extends State<yorumSayfasi> {
             yorumlar.add(yorum.fromDocument(document));
           });
           return Container(
-            color: Colors.white,
+            color: Colors.grey.shade100,
             child: ListView(
               children: yorumlar,
             ),
@@ -108,7 +108,7 @@ class _yorumSayfasiState extends State<yorumSayfasi> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: IconButton(
@@ -128,82 +128,127 @@ class _yorumSayfasiState extends State<yorumSayfasi> {
             child: yorumlariGoster(),
           ),
           Padding(
-            padding: EdgeInsets.all(12),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 85,
-                decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x540000000),
-                        spreadRadius: 4,
-                        blurRadius: 7,
+            padding: EdgeInsets.all(15),
+            child: Container(
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(
+                    offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)
+              ], borderRadius: BorderRadius.circular(30), color: Colors.black),
+              height: 50.0,
+              child: Padding(
+                padding: EdgeInsets.all(5),
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(width: 3),
+                    // Button send image
+                    Padding(
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(anlikKullanici!.url),
                       ),
-                    ],
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.white),
-                child: ListTile(
-                  title: Row(
-                    children: [
-                      Padding(
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage(anlikKullanici!.url),
-                        ),
-                        padding: EdgeInsets.only(top: 20),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Form(
+                      padding: EdgeInsets.only(top: 0),
+                    ),
+                    SizedBox(
+                      width: 30,
+                    ),
+                    // Edit text
+                    Flexible(
+                      child: Container(
+                        child: TextFormField(
                           key: formKey,
-                          child: TextFormField(
-                            controller: widget.yorumduzeltmeKontrolu,
-                            decoration: InputDecoration(
-                              labelText: "Yorum yaz",
-                              labelStyle: TextStyle(color: Colors.black54),
-                              enabledBorder: UnderlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.black54)),
-                              focusedBorder: UnderlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.black54)),
-                            ),
-                            style: TextStyle(color: Colors.black),
-                            validator: (girilenDeger) {
-                              if (girilenDeger!.length > 0) {
-                                return null;
-                              } else
-                                return "";
-                            },
-                            onSaved: (kaydedilecekDeger) {
-                              widget.yorumduzeltmeKontrolu.text =
-                                  kaydedilecekDeger!;
-                            },
+                          style: TextStyle(color: Colors.white, fontSize: 15.0),
+                          controller: widget.yorumduzeltmeKontrolu,
+                          decoration: InputDecoration.collapsed(
+                            hintText: "Yorum yaz..",
+                            hintStyle: TextStyle(color: Colors.grey),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  trailing: OutlinedButton(
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        formKey.currentState!.save();
-                        yorumlariKaydet();
-                      }
-                    },
-                    child: Text(
-                      "Gönder",
-                      style: TextStyle(
-                          color: Colors.teal, fontWeight: FontWeight.bold),
                     ),
-                  ),
+
+                    // Button send message
+                    IconButton(
+                      icon: Icon(Icons.send),
+                      onPressed: () {
+                        yorumlariKaydet();
+                      },
+                      color: Colors.white,
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Padding buildInputPadding() {
+    return Padding(
+      padding: EdgeInsets.all(12),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          height: 65,
+          decoration: BoxDecoration(boxShadow: [
+            BoxShadow(
+                offset: Offset(0, 10),
+                blurRadius: 1,
+                color: Colors.grey.shade400)
+          ], borderRadius: BorderRadius.circular(20), color: Colors.white),
+          child: ListTile(
+            title: Row(
+              children: [
+                Padding(
+                  child: CircleAvatar(
+                    backgroundImage: NetworkImage(anlikKullanici!.url),
+                  ),
+                  padding: EdgeInsets.only(top: 0),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  child: Form(
+                    key: formKey,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: TextFormField(
+                        controller: widget.yorumduzeltmeKontrolu,
+                        decoration: InputDecoration.collapsed(
+                          hintText: "Yorum yaz",
+                          hintStyle: TextStyle(color: Colors.grey),
+                        ),
+                        style: TextStyle(color: Colors.black),
+                        validator: (girilenDeger) {},
+                        onSaved: (kaydedilecekDeger) {
+                          widget.yorumduzeltmeKontrolu.text =
+                              kaydedilecekDeger!;
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            trailing: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.send,
+                  size: 30,
+                ),
+                onPressed: () {
+                  if (formKey.currentState!.validate()) {
+                    formKey.currentState!.save();
+                    yorumlariKaydet();
+                  }
+                },
+                color: Colors.green.shade700,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -259,7 +304,10 @@ class _yorumState extends State<yorum> {
         if (anlikKullanici!.id == yorums.userID) {
           if (document.exists) {
             document.reference.delete();
-            SnackBar snackBar = SnackBar(content: Text("Yorum Silindi.."));
+            SnackBar snackBar = SnackBar(
+              content: Text("Yorum Silindi.."),
+              duration: Duration(seconds: 0, milliseconds: 500),
+            );
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
           }
           QuerySnapshot<Map<String, dynamic>> qs = await bildirimRef

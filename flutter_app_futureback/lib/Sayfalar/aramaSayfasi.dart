@@ -120,7 +120,7 @@ class _aramaSayfasiState extends State<aramaSayfasi> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70.0),
         child: aramaSayfasiBasligi(),

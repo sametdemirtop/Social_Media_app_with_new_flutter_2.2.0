@@ -104,7 +104,7 @@ class _GonderilerState extends State<Gonderiler> {
     isLiked = (likes![anlikKullanici!.id.toString()] == true);
     kaydedildimi = (kaydedilenler![anlikKullanici!.id.toString()] == true);
     return Padding(
-      padding: EdgeInsets.only(top: 35, right: 20, left: 20),
+      padding: EdgeInsets.only(top: 10, right: 20, left: 20, bottom: 20),
       child: Container(
         decoration: BoxDecoration(boxShadow: [
           BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)

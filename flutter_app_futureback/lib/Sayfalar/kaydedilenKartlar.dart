@@ -51,7 +51,7 @@ class _kaydedilenKartlarState extends State<kaydedilenKartlar> {
             }
           });
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.grey.shade100,
             appBar: baslik(context, strBaslik: "Kaydedilen Kartlar"),
             body: RefreshIndicator(
                 color: Colors.black,

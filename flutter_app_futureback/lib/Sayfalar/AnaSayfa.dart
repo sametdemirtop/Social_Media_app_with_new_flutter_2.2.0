@@ -27,10 +27,13 @@ final takipEdilenRef = FirebaseFirestore.instance.collection("Takip Edilenler");
 final gonderiRef = FirebaseFirestore.instance.collection("Gonderilenler");
 final akisRef = FirebaseFirestore.instance.collection("Ana Akis");
 final kartlarRef = FirebaseFirestore.instance.collection("Kartlar");
+final messageRef = FirebaseFirestore.instance.collection("messages");
+final sohbetRef = FirebaseFirestore.instance.collection("sohbet");
 final scaffoldKey = GlobalKey<ScaffoldState>();
 final FirebaseAuth _auth = FirebaseAuth.instance;
 FirebaseMessaging messaging = FirebaseMessaging.instance;
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 final DateTime timestamp = DateTime.now();
 
 /// Create a [AndroidNotificationChannel] for heads up notifications
@@ -58,7 +61,8 @@ class AnaSayfa extends StatefulWidget {
   }
 }
 
-class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin {
+class _AnaSayfaState extends State<AnaSayfa>
+    with SingleTickerProviderStateMixin {
   bool girdimi = false;
 
   TextEditingController _emailController = TextEditingController();
@@ -205,10 +209,17 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
   }
 
   static void showNotification(RemoteMessage message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails('1234', 'Yeni Mesaj', 'your channel description',
-        importance: Importance.max, priority: Priority.high, ticker: 'ticker');
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(0, message.data['title'], message.data['message'], platformChannelSpecifics, payload: 'item x');
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+            '1234', 'Yeni Mesaj', 'your channel description',
+            importance: Importance.max,
+            priority: Priority.high,
+            ticker: 'ticker');
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(0, message.data['title'],
+        message.data['message'], platformChannelSpecifics,
+        payload: 'item x');
   }
 
   /*Future<void> sendPushMessage() async {
@@ -272,10 +283,10 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
             bottom: 40,
           ),
           child: Container(
-            decoration: BoxDecoration(
-                boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.white),
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(
+                  offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)
+            ], borderRadius: BorderRadius.circular(20), color: Colors.white),
             child: ClipRRect(
               borderRadius: BorderRadius.all(Radius.circular(40)),
               child: Container(
@@ -290,10 +301,17 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                             width: 220,
                             height: 90,
                             decoration: BoxDecoration(
-                                boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
+                                boxShadow: [
+                                  BoxShadow(
+                                      offset: Offset(0, 10),
+                                      blurRadius: 10,
+                                      color: Colors.grey)
+                                ],
                                 shape: BoxShape.circle,
                                 image: DecorationImage(
-                                  colorFilter: ColorFilter.mode(Colors.black.withOpacity(1), BlendMode.dstATop),
+                                  colorFilter: ColorFilter.mode(
+                                      Colors.black.withOpacity(1),
+                                      BlendMode.dstATop),
                                   image: AssetImage("assets/images/sscard.png"),
                                 )),
                           ),
@@ -302,7 +320,10 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                           ),
                           Text(
                             "maCarD",
-                            style: TextStyle(color: Colors.black.withOpacity(0.5), fontSize: 34, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: Colors.black.withOpacity(0.5),
+                                fontSize: 34,
+                                fontWeight: FontWeight.bold),
                           ),
                           Text(
                             "Share your card",
@@ -338,10 +359,9 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
     return Padding(
       padding: EdgeInsets.only(right: 20, left: 20),
       child: Container(
-        decoration: BoxDecoration(
-            boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.white),
+        decoration: BoxDecoration(boxShadow: [
+          BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)
+        ], borderRadius: BorderRadius.circular(20), color: Colors.white),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
@@ -353,27 +373,32 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                   children: [
                     Text(
                       "Welcome Back",
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(
                       height: 10,
                     ),
                     Text(
                       "Sign in to continue",
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(
                       height: 15,
                     ),
                     TextFormField(
                       controller: _emailController,
-                      validator: (val) => val!.isNotEmpty ? null : "Please enter a mail address",
+                      validator: (val) => val!.isNotEmpty
+                          ? null
+                          : "Please enter a mail address",
                       decoration: InputDecoration(
                         hintText: "E-mail",
                         prefixIcon: Icon(Icons.mail),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.deepOrange, width: 6),
+                          borderSide:
+                              BorderSide(color: Colors.deepOrange, width: 6),
                         ),
                       ),
                     ),
@@ -382,14 +407,16 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                     ),
                     TextFormField(
                       controller: _passwordController,
-                      validator: (val) => val!.length < 6 ? "Enter more than 6 char " : null,
+                      validator: (val) =>
+                          val!.length < 6 ? "Enter more than 6 char " : null,
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: "Password",
                         prefixIcon: Icon(Icons.vpn_key),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.deepOrange, width: 6),
+                          borderSide:
+                              BorderSide(color: Colors.deepOrange, width: 6),
                         ),
                       ),
                     ),
@@ -401,9 +428,14 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                         if (formKey.currentState!.validate()) {
                           debugPrint("Email= " + _emailController.text);
                           debugPrint("pass= " + _passwordController.text);
-                          signIn(_emailController.text, _passwordController.text).then((value) {
+                          signIn(_emailController.text,
+                                  _passwordController.text)
+                              .then((value) {
                             setState(() {
-                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => GirisEkran()));
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => GirisEkran()));
                             });
                           });
                         }
@@ -417,7 +449,8 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                       ),
                       child: Text(
                         "Login",
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
                     SizedBox(
@@ -444,7 +477,10 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                     Center(
                       child: Text(
                         "OR",
-                        style: TextStyle(color: Colors.black.withOpacity(0.5), fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: Colors.black.withOpacity(0.5),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                     SizedBox(
@@ -462,7 +498,8 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(150),
                           image: DecorationImage(
-                            image: AssetImage("assets/images/google_signin_button1.png"),
+                            image: AssetImage(
+                                "assets/images/google_signin_button1.png"),
                           ),
                         ),
                       ),
@@ -482,10 +519,9 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
     return Padding(
       padding: EdgeInsets.only(right: 20, left: 20),
       child: Container(
-        decoration: BoxDecoration(
-            boxShadow: [BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)],
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.white),
+        decoration: BoxDecoration(boxShadow: [
+          BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.grey)
+        ], borderRadius: BorderRadius.circular(20), color: Colors.white),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
@@ -497,27 +533,32 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                   children: [
                     Text(
                       "Welcome",
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(
                       height: 10,
                     ),
                     Text(
                       "Create account to continue",
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(
                       height: 15,
                     ),
                     TextFormField(
                       controller: _usernameController,
-                      validator: (val) => val!.length <= 4 ? "Enter 4 char or more than 4 char " : null,
+                      validator: (val) => val!.length <= 4
+                          ? "Enter 4 char or more than 4 char "
+                          : null,
                       decoration: InputDecoration(
                         hintText: "Username",
                         prefixIcon: Icon(Icons.person_pin_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.deepOrange, width: 6),
+                          borderSide:
+                              BorderSide(color: Colors.deepOrange, width: 6),
                         ),
                       ),
                     ),
@@ -526,13 +567,16 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                     ),
                     TextFormField(
                       controller: _nameController,
-                      validator: (val) => val!.length <= 3 ? "Enter 3 char or more than 3 char " : null,
+                      validator: (val) => val!.length <= 3
+                          ? "Enter 3 char or more than 3 char "
+                          : null,
                       decoration: InputDecoration(
                         hintText: "Name",
                         prefixIcon: Icon(Icons.person),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.deepOrange, width: 6),
+                          borderSide:
+                              BorderSide(color: Colors.deepOrange, width: 6),
                         ),
                       ),
                     ),
@@ -541,13 +585,16 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                     ),
                     TextFormField(
                       controller: _emailController,
-                      validator: (val) => val!.isNotEmpty ? null : "Please enter a mail address",
+                      validator: (val) => val!.isNotEmpty
+                          ? null
+                          : "Please enter a mail address",
                       decoration: InputDecoration(
                         hintText: "E-mail",
                         prefixIcon: Icon(Icons.mail),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.deepOrange.shade200, width: 6),
+                          borderSide: BorderSide(
+                              color: Colors.deepOrange.shade200, width: 6),
                         ),
                       ),
                     ),
@@ -556,14 +603,16 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                     ),
                     TextFormField(
                       controller: _passwordController,
-                      validator: (val) => val!.length < 6 ? "Enter more than 6 char " : null,
+                      validator: (val) =>
+                          val!.length < 6 ? "Enter more than 6 char " : null,
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: "Password",
                         prefixIcon: Icon(Icons.vpn_key),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.deepOrange, width: 6),
+                          borderSide:
+                              BorderSide(color: Colors.deepOrange, width: 6),
                         ),
                       ),
                     ),
@@ -575,7 +624,12 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                         if (formKey.currentState!.validate()) {
                           debugPrint("Email= " + _emailController.text);
                           debugPrint("pass= " + _passwordController.text);
-                          createPerson(_emailController.text, _passwordController.text, _nameController.text, _usernameController.text).then((value) {
+                          createPerson(
+                                  _emailController.text,
+                                  _passwordController.text,
+                                  _nameController.text,
+                                  _usernameController.text)
+                              .then((value) {
                             setState(() {
                               isToogle = false;
                             });
@@ -591,7 +645,8 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
                       ),
                       child: Text(
                         "Register",
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
                     SizedBox(
@@ -627,9 +682,11 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
 
   kullaniciFireStoreKayit() async {
     final GoogleSignInAccount? gAnlikKullanici = googlegiris!.currentUser;
-    DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await kullaniciRef.doc(gAnlikKullanici!.id).get();
+    DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+        await kullaniciRef.doc(gAnlikKullanici!.id).get();
     if (!documentSnapshot.exists) {
-      final username = await Navigator.push(context, MaterialPageRoute(builder: (context) => HesapOlusturmaSayfasi()));
+      final username = await Navigator.push(context,
+          MaterialPageRoute(builder: (context) => HesapOlusturmaSayfasi()));
 
       kullaniciRef.doc(gAnlikKullanici.id).set({
         "id": gAnlikKullanici.id,
@@ -639,16 +696,19 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
         "email": gAnlikKullanici.email,
         "biography": "",
         "timestamp": timestamp,
+        "chattingWith": "",
       });
-      //await takipciRef.doc(anlikKullanici.id).collection("takipciler").doc(anlikKullanici.id).set({});
+
       documentSnapshot = await kullaniciRef.doc(anlikKullanici!.id).get();
     }
     anlikKullanici = Kullanici.fromDocument(documentSnapshot);
   }
 
   Future<User?> signIn(String email, String password) async {
-    var user = await _auth.signInWithEmailAndPassword(email: email, password: password);
-    DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await kullaniciRef.doc(user.user!.uid).get();
+    var user = await _auth.signInWithEmailAndPassword(
+        email: email, password: password);
+    DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+        await kullaniciRef.doc(user.user!.uid).get();
     if (!documentSnapshot.exists) {
       documentSnapshot = await kullaniciRef.doc(user.user!.uid).get();
     }
@@ -661,9 +721,12 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
   }
 
   // ignore: non_constant_identifier_names
-  Future<User?> createPerson(String email, String password, String name, String username) async {
-    var user = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-    DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await kullaniciRef.doc(user.user!.uid).get();
+  Future<User?> createPerson(
+      String email, String password, String name, String username) async {
+    var user = await _auth.createUserWithEmailAndPassword(
+        email: email, password: password);
+    DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+        await kullaniciRef.doc(user.user!.uid).get();
     if (!documentSnapshot.exists) {
       final urlIndirme = await Navigator.push(
           context,
@@ -680,8 +743,8 @@ class _AnaSayfaState extends State<AnaSayfa> with SingleTickerProviderStateMixin
         "email": user.user!.email,
         "biography": "",
         "timestamp": timestamp,
+        "chattingWith": "",
       });
-      //await takipciRef.doc(user.user.uid).collection("takipciler").doc(user.user.uid).set({});
       documentSnapshot = await kullaniciRef.doc(user.user!.uid).get();
     }
     anlikKullanici = Kullanici.fromDocument(documentSnapshot);

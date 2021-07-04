@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_futureback/Sayfalar/AnaSayfa.dart';
 import 'package:flutter_app_futureback/Sayfalar/takipEdilenler.dart';
 import 'package:flutter_app_futureback/model/Kullanici.dart';
-import 'package:flutter_app_futureback/widgets/baslik.dart';
 import 'package:flutter_app_futureback/widgets/gonderi.dart';
+
+import 'MessageHomePage.dart';
 
 // ignore: camel_case_types
 class anaAkisSayfasi extends StatefulWidget {
@@ -97,12 +98,56 @@ class _anaAkisSayfasiState extends State<anaAkisSayfasi>
     }
   }
 
+  PreferredSize akisBaslik() {
+    return PreferredSize(
+        child: AppBar(
+          elevation: 10,
+          iconTheme: IconThemeData(color: Colors.black),
+          automaticallyImplyLeading: false,
+          actions: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(right: 12),
+              child: IconButton(
+                iconSize: 40,
+                icon: Icon(
+                  Icons.mark_email_read_rounded,
+                  color: Colors.deepOrange[200],
+                ),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => HomeScreen(
+                                currentUserId: anlikKullanici!.id,
+                              )));
+                },
+              ),
+            ),
+          ],
+          title: Text(
+            "Kartlar",
+            style: TextStyle(
+              color: Colors.black,
+              //fontFamily: uygulamaBasligi ? "Signatra" : "",
+              fontSize: 22.0,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(50)),
+          ),
+        ),
+        preferredSize: Size.fromHeight(50));
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: baslik(context, strBaslik: "Kartlar", geriButonuYokSay: true),
+      backgroundColor: Colors.grey.shade100,
+      appBar: akisBaslik(),
       body: RefreshIndicator(
         color: Colors.black,
         child: checkSitutaion(),

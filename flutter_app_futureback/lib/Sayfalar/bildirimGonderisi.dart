@@ -13,7 +13,11 @@ class bildirimGonderisi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DocumentSnapshot>(
-        future: gonderiRef.doc(anlikKullanici!.id).collection("kullaniciGonderi").doc(gonderiID).get(),
+        future: gonderiRef
+            .doc(anlikKullanici!.id)
+            .collection("kullaniciGonderi")
+            .doc(gonderiID)
+            .get(),
         builder: (context, ds) {
           if (!ds.hasData) {
             return circularProgress();
@@ -21,7 +25,7 @@ class bildirimGonderisi extends StatelessWidget {
           Gonderiler gonderiler = Gonderiler.fromDocument(ds.data!);
           return Center(
             child: Scaffold(
-              backgroundColor: Colors.white,
+              backgroundColor: Colors.grey.shade100,
               appBar: baslik(context, strBaslik: ""),
               body: SingleChildScrollView(child: gonderiler),
             ),

@@ -365,7 +365,7 @@ class _profilSayfasiState extends State<profilSayfasi>
     });
   }
 
-  takipEtmeKontrolu() {
+  takipEtmeKontrolu() async {
     setState(() {
       takip = true;
     });
@@ -375,14 +375,30 @@ class _profilSayfasiState extends State<profilSayfasi>
         .doc(onlineKullaniciID)
         .set({
       "id": onlineKullaniciID,
+      "url": anlikKullanici!.url,
+      "username": anlikKullanici!.username,
+      "profileName": anlikKullanici!.profileName,
     });
-    takipEdilenRef
-        .doc(onlineKullaniciID)
-        .collection("takipEdilenler")
-        .doc(widget.kullaniciprofilID)
-        .set({
-      "id": widget.kullaniciprofilID,
-    });
+    QuerySnapshot snapshot1 = await kullaniciRef
+        .where("id", isEqualTo: widget.kullaniciprofilID)
+        .get();
+    List<Kullanici> kullaniciress =
+        snapshot1.docs.map((doc) => Kullanici.fromDocument(doc)).toList();
+    for (var doc in kullaniciress) {
+      if (doc.id == widget.kullaniciprofilID) {
+        takipEdilenRef
+            .doc(onlineKullaniciID)
+            .collection("takipEdilenler")
+            .doc(widget.kullaniciprofilID)
+            .set({
+          "id": widget.kullaniciprofilID,
+          "url": doc.url,
+          "username": doc.username,
+          "profileName": doc.profileName,
+        });
+      }
+    }
+
     bildirimRef
         .doc(widget.kullaniciprofilID)
         .collection("bildirimler")
@@ -445,7 +461,7 @@ class _profilSayfasiState extends State<profilSayfasi>
   Scaffold anaMenu() {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       appBar: baslikOlustur(),
       body: RefreshIndicator(
         color: Colors.black,

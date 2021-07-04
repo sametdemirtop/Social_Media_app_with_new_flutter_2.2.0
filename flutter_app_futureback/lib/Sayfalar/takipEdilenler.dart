@@ -97,12 +97,22 @@ class _takipEdilenlerState extends State<takipEdilenler> {
 // ignore: camel_case_types
 class tEdilen {
   final String id;
+  final String username;
+  final String url;
+  final String profileName;
 
-  tEdilen({required this.id});
+  tEdilen(
+      {required this.id,
+      required this.username,
+      required this.url,
+      required this.profileName});
 
   factory tEdilen.fromDocument(DocumentSnapshot doc) {
     return tEdilen(
       id: doc['id'],
+      username: doc['username'],
+      url: doc['url'],
+      profileName: doc['profileName'],
     );
   }
 }
