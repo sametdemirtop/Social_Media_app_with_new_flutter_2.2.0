@@ -522,9 +522,15 @@ class HomeScreenState extends State<HomeScreen> {
                       documentReference,
                       {
                         'isRead': true,
-
                       },
                     );
+                  });
+                  sohbetRef
+                      .doc(doc.idFrom)
+                      .collection("sohbetEdilenler")
+                      .doc(doc.idTo)
+                      .update({
+                    "isEntered": true,
                   });
                 }
               }
@@ -533,7 +539,6 @@ class HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => Chat(
-                    tikladi: tikladi = true,
                     receiverUsername: userChat.username,
                     receiverId: userChat.id,
                     receiverAvatar: userChat.url,
@@ -558,9 +563,22 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<bool> checkOnline() async {
+    Future<QuerySnapshot<Map<String, dynamic>>> document = kullaniciRef.get();
+    Sohbet userChat =
+        Sohbet.fromDocument(document as DocumentSnapshot<Object?>);
+    DocumentSnapshot ds = await sohbetRef
+        .doc(userChat.id)
+        .collection("sohbetEdilenler")
+        .doc(anlikKullanici!.id)
+        .get();
+    return ds.get("isEntered");
+  }
+
   Widget buildItem2(BuildContext context, DocumentSnapshot? document) {
     if (document != null) {
       Sohbet userChat = Sohbet.fromDocument(document);
+
       if (id.hashCode <= userChat.id.hashCode) {
         groupChatId = '$id-${userChat.id}';
       } else {
@@ -617,14 +635,23 @@ class HomeScreenState extends State<HomeScreen> {
                       fontSize: 12.0,
                       fontStyle: FontStyle.italic),
                 ),
-                Text(
-                  "Last Message : ${userChat.lastContent}",
-                  style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 13.0,
-                      fontStyle: FontStyle.normal,
-                      fontWeight: FontWeight.w600),
-                ),
+                document.get("id") != id
+                    ? Text(
+                        "sen : ${userChat.lastContent}",
+                        style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13.0,
+                            fontStyle: FontStyle.normal,
+                            fontWeight: FontWeight.w600),
+                      )
+                    : Text(
+                        "${userChat.username} : ${userChat.lastContent}",
+                        style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13.0,
+                            fontStyle: FontStyle.normal,
+                            fontWeight: FontWeight.w600),
+                      ),
               ],
             ),
           ),
@@ -653,6 +680,13 @@ class HomeScreenState extends State<HomeScreen> {
                     },
                   );
                 });
+                sohbetRef
+                    .doc(doc.idFrom)
+                    .collection("sohbetEdilenler")
+                    .doc(doc.idTo)
+                    .update({
+                  "isEntered": true,
+                });
               }
             }
 
@@ -660,7 +694,6 @@ class HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                 builder: (context) => Chat(
-                  tikladi: tikladi = true,
                   receiverUsername: userChat.username,
                   receiverId: userChat.id,
                   receiverAvatar: userChat.url,
@@ -697,7 +730,6 @@ class KullaniciSonuc extends StatelessWidget {
   KullaniciSonuc(this.herbirKullanici);
   String id = anlikKullanici!.id;
   String groupChatId = "";
-  bool tikladi = false;
 
   @override
   Widget build(BuildContext context) {
@@ -784,13 +816,20 @@ class KullaniciSonuc extends StatelessWidget {
             },
           );
         });
+        sohbetRef
+            .doc(doc.idFrom)
+            .collection("sohbetEdilenler")
+            .doc(doc.idTo)
+            .update({
+          "isEntered": true,
+        });
       }
     }
+
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => Chat(
-                  tikladi: tikladi = true,
                   receiverUsername: kullaniciProfil.username,
                   receiverId: kullaniciProfil.id,
                   receiverAvatar: kullaniciProfil.url,

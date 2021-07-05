@@ -7,19 +7,25 @@ class Sohbet {
   final Timestamp? timestamp;
   final String username;
   final String profileName;
+  final bool isEntered;
+  final String messageID;
 
   Sohbet({
     required this.lastContent,
     required this.id,
+    required this.messageID,
     required this.url,
     required this.timestamp,
     required this.username,
     required this.profileName,
+    required this.isEntered,
   });
 
   factory Sohbet.fromDocument(DocumentSnapshot doc) {
     return Sohbet(
       lastContent: doc['lastContent'],
+      messageID: doc['messageID'],
+      isEntered: doc['isEntered'],
       id: doc['id'],
       url: doc['url'],
       timestamp: doc['timestamp'],

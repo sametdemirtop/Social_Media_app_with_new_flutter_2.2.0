@@ -17,49 +17,64 @@ class Chat extends StatelessWidget {
   final String receiverId;
   final String receiverUsername;
   final String receiverAvatar;
-  final bool tikladi;
 
-  Chat(
-      {required this.receiverId,
-      required this.receiverAvatar,
-      required this.receiverUsername,
-      required this.tikladi});
+  Chat({
+    required this.receiverId,
+    required this.receiverAvatar,
+    required this.receiverUsername,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 25.0),
-            child: CircleAvatar(
-              radius: 23,
-              backgroundColor: Colors.black,
-              backgroundImage: NetworkImage(receiverAvatar),
-            ),
-          ),
-        ],
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => HomeScreen(
-                        currentUserId: anlikKullanici!.id,
-                      ))),
+            icon: Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () async {
+              DocumentSnapshot ds =
+                  await kullaniciRef.doc(anlikKullanici!.id).get();
+              Kullanici k1 = Kullanici.fromDocument(ds);
+              DocumentSnapshot ds1 =
+                  await kullaniciRef.doc(k1.chattingWith).get();
+              Kullanici k2 = Kullanici.fromDocument(ds1);
+              sohbetRef
+                  .doc(k2.id)
+                  .collection("sohbetEdilenler")
+                  .doc(anlikKullanici!.id)
+                  .update({
+                "isEntered": false,
+              });
+
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => HomeScreen(
+                            currentUserId: anlikKullanici!.id,
+                          )));
+            }),
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.black,
+              backgroundImage: NetworkImage(receiverAvatar),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Text(receiverUsername,
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold)),
+          ],
         ),
-        title: Text(receiverUsername,
-            style: TextStyle(
-                color: Colors.black,
-                fontSize: 23,
-                fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: ChatScreen(
-        tikladi: tikladi,
         receiverId: receiverId,
         receiverUsername: receiverUsername,
         receiverAvatar: receiverAvatar,
@@ -72,31 +87,29 @@ class ChatScreen extends StatefulWidget {
   final String receiverId;
   final String receiverAvatar;
   final String receiverUsername;
-  final bool tikladi;
 
   ChatScreen(
       {required this.receiverId,
       required this.receiverAvatar,
-      required this.tikladi,
       required this.receiverUsername});
 
   @override
   State createState() => ChatScreenState(
-      receiverId: receiverId,
-      tikladi: tikladi,
-      receiverAvatar: receiverAvatar,
-      receiverUsername: receiverUsername);
+        receiverId: receiverId,
+        receiverAvatar: receiverAvatar,
+        receiverUsername: receiverUsername,
+      );
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  ChatScreenState(
-      {required this.receiverId,
-      required this.receiverAvatar,
-      required this.tikladi,
-      required this.receiverUsername});
+  ChatScreenState({
+    required this.receiverId,
+    required this.receiverAvatar,
+    required this.receiverUsername,
+  });
 
   String receiverId;
-  bool tikladi;
+
   String receiverAvatar;
   String receiverUsername;
   String? id = anlikKullanici!.id;
@@ -134,9 +147,7 @@ class ChatScreenState extends State<ChatScreen> {
     super.initState();
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(_scrollListener);
-
     readLocal();
-    //checkRead();
   }
 
   void onFocusChange() {
@@ -175,14 +186,6 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Future checkRead() async {
-    await messageRef
-        .doc(groupChatId)
-        .collection(groupChatId)
-        .doc(DateTime.now().millisecondsSinceEpoch.toString())
-        .update({"isRead": true});
-  }
-
   void getSticker() {
     // Hide keyboard when sticker appear
     focusNode.unfocus();
@@ -212,53 +215,226 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> onSendMessage(String content, int type) async {
-    // type: 0 = text, 1 = image, 2 = sticker
-
     if (content.trim() != '') {
       textEditingController.clear();
       String time = DateTime.now().millisecondsSinceEpoch.toString();
+      DocumentSnapshot ds = await kullaniciRef.doc(anlikKullanici!.id).get();
+      Kullanici k1 = Kullanici.fromDocument(ds);
+      DocumentSnapshot ds1 = await kullaniciRef.doc(k1.chattingWith).get();
+      Kullanici k2 = Kullanici.fromDocument(ds1);
+
       var documentReference = FirebaseFirestore.instance
           .collection('messages')
           .doc(groupChatId)
           .collection(groupChatId)
           .doc(time);
 
-      FirebaseFirestore.instance.runTransaction((transaction) async {
-        transaction.set(
-          documentReference,
-          {
-            'messageID': time,
-            'idFrom': id,
-            'idTo': receiverId,
-            'timestamp': DateTime.now(),
-            'content': content,
-            'type': type,
-            'isRead': false,
-          },
-        );
+      sohbetRef
+          .doc(id)
+          .collection("sohbetEdilenler")
+          .doc(k2.id)
+          .get()
+          .then((value1) async {
+        sohbetRef
+            .doc(k2.id)
+            .collection("sohbetEdilenler")
+            .doc(id)
+            .get()
+            .then((value2) {
+          if (value1.exists == true && value2.exists == true) {
+            if (value1.get("isEntered") == false &&
+                value2.get("isEntered") == true) {
+              FirebaseFirestore.instance.runTransaction((transaction) async {
+                transaction.set(
+                  documentReference,
+                  {
+                    'messageID': time,
+                    'idFrom': id,
+                    'idTo': receiverId,
+                    'timestamp': DateTime.now(),
+                    'content': content,
+                    'type': type,
+                    'isRead': false,
+                  },
+                );
+              });
+              sohbetRef.doc(id).collection("sohbetEdilenler").doc(k2.id).set({
+                "id": k2.id,
+                "url": k2.url,
+                "username": k2.username,
+                "profileName": k2.profileName,
+                "lastContent": content,
+                "timestamp": DateTime.now(),
+                "isEntered": false,
+                "messageID": time,
+              });
+              sohbetRef.doc(k2.id).collection("sohbetEdilenler").doc(id).set({
+                "id": id,
+                "url": anlikKullanici!.url,
+                "username": anlikKullanici!.username,
+                "profileName": anlikKullanici!.profileName,
+                "lastContent": content,
+                "timestamp": DateTime.now(),
+                "isEntered": true,
+                "messageID": time,
+              });
+            } else if (value1.get("isEntered") == true &&
+                value2.get("isEntered") == false) {
+              FirebaseFirestore.instance.runTransaction((transaction) async {
+                transaction.set(
+                  documentReference,
+                  {
+                    'messageID': time,
+                    'idFrom': id,
+                    'idTo': receiverId,
+                    'timestamp': DateTime.now(),
+                    'content': content,
+                    'type': type,
+                    'isRead': false,
+                  },
+                );
+              });
+              sohbetRef.doc(id).collection("sohbetEdilenler").doc(k2.id).set({
+                "id": k2.id,
+                "url": k2.url,
+                "username": k2.username,
+                "profileName": k2.profileName,
+                "lastContent": content,
+                "timestamp": DateTime.now(),
+                "isEntered": true,
+                "messageID": time,
+              });
+              sohbetRef.doc(k2.id).collection("sohbetEdilenler").doc(id).set({
+                "id": id,
+                "url": anlikKullanici!.url,
+                "username": anlikKullanici!.username,
+                "profileName": anlikKullanici!.profileName,
+                "lastContent": content,
+                "timestamp": DateTime.now(),
+                "isEntered": false,
+                "messageID": time,
+              });
+            } else if (value1.get("isEntered") == true &&
+                value2.get("isEntered") == true) {
+              FirebaseFirestore.instance.runTransaction((transaction) async {
+                transaction.set(
+                  documentReference,
+                  {
+                    'messageID': time,
+                    'idFrom': id,
+                    'idTo': receiverId,
+                    'timestamp': DateTime.now(),
+                    'content': content,
+                    'type': type,
+                    'isRead': true,
+                  },
+                );
+              });
+              sohbetRef.doc(id).collection("sohbetEdilenler").doc(k2.id).set({
+                "id": k2.id,
+                "url": k2.url,
+                "username": k2.username,
+                "profileName": k2.profileName,
+                "lastContent": content,
+                "timestamp": DateTime.now(),
+                "isEntered": true,
+                "messageID": time,
+              });
+              sohbetRef.doc(k2.id).collection("sohbetEdilenler").doc(id).set({
+                "id": id,
+                "url": anlikKullanici!.url,
+                "username": anlikKullanici!.username,
+                "profileName": anlikKullanici!.profileName,
+                "lastContent": content,
+                "timestamp": DateTime.now(),
+                "isEntered": true,
+                "messageID": time,
+              });
+            } else if (value1.get("isEntered") == false &&
+                value2.get("isEntered") == false) {
+              sohbetRef.doc(id).collection("sohbetEdilenler").doc(k2.id).set({
+                "id": k2.id,
+                "url": k2.url,
+                "username": k2.username,
+                "profileName": k2.profileName,
+                "lastContent": content,
+                "timestamp": DateTime.now(),
+                "isEntered": false,
+                "messageID": time,
+              });
+              sohbetRef.doc(k2.id).collection("sohbetEdilenler").doc(id).set({
+                "id": id,
+                "url": anlikKullanici!.url,
+                "username": anlikKullanici!.username,
+                "profileName": anlikKullanici!.profileName,
+                "lastContent": content,
+                "timestamp": DateTime.now(),
+                "isEntered": false,
+                "messageID": time,
+              });
+            }
+          } else {
+            FirebaseFirestore.instance.runTransaction((transaction) async {
+              transaction.set(
+                documentReference,
+                {
+                  'messageID': time,
+                  'idFrom': id,
+                  'idTo': receiverId,
+                  'timestamp': DateTime.now(),
+                  'content': content,
+                  'type': type,
+                  'isRead': false,
+                },
+              );
+            }).then((value) {
+              if (k2.id == receiverId) {
+                sohbetRef.doc(id).collection("sohbetEdilenler").doc(k2.id).set({
+                  "id": k2.id,
+                  "url": k2.url,
+                  "username": k2.username,
+                  "profileName": k2.profileName,
+                  "lastContent": content,
+                  "timestamp": DateTime.now(),
+                  "isEntered": false,
+                  "messageID": time,
+                });
+                sohbetRef.doc(k2.id).collection("sohbetEdilenler").doc(id).set({
+                  "id": id,
+                  "url": anlikKullanici!.url,
+                  "username": anlikKullanici!.username,
+                  "profileName": anlikKullanici!.profileName,
+                  "lastContent": content,
+                  "timestamp": DateTime.now(),
+                  "isEntered": true,
+                  "messageID": time,
+                });
+              } else {
+                sohbetRef.doc(id).collection("sohbetEdilenler").doc(k2.id).set({
+                  "id": k2.id,
+                  "url": k2.url,
+                  "username": k2.username,
+                  "profileName": k2.profileName,
+                  "lastContent": content,
+                  "timestamp": DateTime.now(),
+                  "isEntered": true,
+                  "messageID": time,
+                });
+                sohbetRef.doc(k2.id).collection("sohbetEdilenler").doc(id).set({
+                  "id": id,
+                  "url": anlikKullanici!.url,
+                  "username": anlikKullanici!.username,
+                  "profileName": anlikKullanici!.profileName,
+                  "lastContent": content,
+                  "timestamp": DateTime.now(),
+                  "isEntered": false,
+                  "messageID": time,
+                });
+              }
+            });
+          }
+        });
       });
-
-      DocumentSnapshot ds = await kullaniciRef.doc(id).get();
-      Kullanici k1 = Kullanici.fromDocument(ds);
-      DocumentSnapshot ds1 = await kullaniciRef.doc(k1.chattingWith).get();
-      Kullanici k2 = Kullanici.fromDocument(ds1);
-      sohbetRef.doc(id).collection("sohbetEdilenler").doc(k2.id).set({
-        "id": k2.id,
-        "url": k2.url,
-        "username": k2.username,
-        "profileName": k2.profileName,
-        "lastContent": content,
-        "timestamp": DateTime.now(),
-      });
-      sohbetRef.doc(k2.id).collection("sohbetEdilenler").doc(id).set({
-        "id": id,
-        "url": anlikKullanici!.url,
-        "username": anlikKullanici!.username,
-        "profileName": anlikKullanici!.profileName,
-        "lastContent": content,
-        "timestamp": DateTime.now(),
-      });
-
       listScrollController.animateTo(0.0,
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
@@ -415,7 +591,7 @@ class ChatScreenState extends State<ChatScreen> {
                     ? Container(
                         child: Icon(
                           Icons.done_all,
-                          color: Colors.deepPurple,
+                          color: Colors.blue,
                         ),
                         margin: EdgeInsets.only(top: 5.0, bottom: 5.0),
                       )
@@ -680,20 +856,13 @@ class ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Stack(
-        children: <Widget>[
+        children: [
           Column(
-            children: <Widget>[
-              // List of messages
+            children: [
               buildListMessage(),
-
-              // Input content
-
               buildInput(),
             ],
           ),
-
-          // Loading
-          //buildLoading()
         ],
       ),
       onWillPop: onBackPress,
@@ -721,8 +890,7 @@ class ChatScreenState extends State<ChatScreen> {
         child: Padding(
           padding: EdgeInsets.all(5),
           child: Row(
-            children: <Widget>[
-              // Button send image
+            children: [
               IconButton(
                 icon: Icon(Icons.add),
                 onPressed: getImage,
